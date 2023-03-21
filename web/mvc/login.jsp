@@ -2,7 +2,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd" >
 <html>
 <head>
-    <title>在线健身管理系统登录</title>
+    <title>库存系统登录</title>
     <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/style.css">
     <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/media.css">
     <style>
@@ -67,7 +67,7 @@
     <div class="message">
         <form name="form1" action="Login" method="post" onsubmit="return notNull(this);">
             <table width="317">
-                <tr><td colspan="2" class="title">在线健身管理系统登录</td></tr>
+                <tr><td colspan="2" class="title">库存系统登录</td></tr>
                 <tr>
                     <td width="100" align="right">用户名:</td>
                     <td width="217"><input name="username" type="text"></td>

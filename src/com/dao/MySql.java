@@ -76,7 +76,7 @@ public class MySql {
 	private void login() {
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
-			String url = "jdbc:mysql://localhost:3306/onlinefitnessmanagementsystem?useUnicode=true&characterRncoding=utf-8";
+			String url = "jdbc:mysql://localhost:3306/inventory_system?useUnicode=true&characterRncoding=utf-8";
 			conn = DriverManager.getConnection(url, "root", "123456");
 		} catch (ClassNotFoundException | SQLException e) {
 			e.printStackTrace();

@@ -3,10 +3,10 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd" >
 <html>
 <%--@elvariable id="translate" type="java.util.Map"--%>
-<%--@elvariable id="user" type="java.util.Map"--%>
-<%--@elvariable id="cidmap" type="java.util.Map"--%>
+<%--@elvariable id="parameters" type="java.util.LinkedHashMap"--%>
+<%--@elvariable id="list" type="java.util.LinkedHashMap"--%>
 <head>
-    <title>${user.name}用户信息修改</title>
+    <title>${list.get(0).get('name')}用户权限修改</title>
     <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/style.css">
     <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/media.css">
 	<style type="text/css">.fonts2 {background-color: #EBEBE4;}</style>
@@ -14,24 +14,26 @@
 <body>
 <center>
 <div class="message">
-<form name="form" action="UserChange" method="post" onsubmit="return NotNull(this);">
+<form name="form" action="UserChangeRank" method="post" onsubmit="return NotNull(this);">
 	<table width="317"><%--@elvariable id="top" type="java.lang.String"--%>
-		<tr><td colspan="2" class="title">${user.name}用户信息修改</td></tr>
+		<tr><td colspan="2" class="title">${list.get(0).get('name')}用户权限修改</td></tr>
 		<tr><td width="100" align="right"></td><td width="217"></td></tr>
 <c:forEach var="st" items="${top}">
-	<c:if test="${st=='password'}" var="if1" scope="page">
-		<tr><td align="right">${translate.get(st)}:</td><td><input name="${st}0" type="password"></td></tr>
-		<tr><td align="right">新密码:</td><td><input name="${st}" type="password"></td></tr>
-		<tr><td align="right">确认密码:</td><td><input name="${st}2" type="password"></td></tr>
+	<c:if test="${st=='rank'}" var="if1" scope="page">
+		<%--@elvariable id="translate" type="java.util.Map"--%>
+		<td align="right">${translate.get(st)}:</td>
+		<td>
+			<select name="${st}" id="sort" size="1">
+				<c:forEach var="entry" items="${parameters.get('2')}">
+					<option value='${entry.key}' <c:if test="${list.get(0).get(st).toString() == entry.key}"> selected = "selected"</c:if>>
+							${entry.value}</option>
+				</c:forEach>
+			</select>
+		</td>
 	</c:if>
-	<c:if test="${st=='rank'}" var="if2" scope="page"><%--@elvariable id="parameters" type="java.util.LinkedHashMap"--%>
+	<c:if test="${not if1}">
 		<tr><td align="right">${translate.get(st)}:</td>
-			<td><input name="${st}" type="text" value="${parameters.get("2").get(user.get(st))}" readonly="readonly" class="fonts2"></td>
-		</tr>
-	</c:if>
-	<c:if test="${not if1 and not if2}">
-		<tr><td align="right">${translate.get(st)}:</td>
-			<td><input name="${st}" type="text" value="${user.get(st)}"></td>
+			<td><input name="${st}" type="text" value="${list.get(0).get(st)}" disabled="disabled"></td>
 		</tr>
 	</c:if>
 </c:forEach>

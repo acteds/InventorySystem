@@ -6,6 +6,9 @@
 body {
     font-family: "微软雅黑", fantasy;
 }
+textarea {
+    font-family: "微软雅黑", fantasy;
+}
 .message {
 	margin-top: 30px;
 	width: 317px;

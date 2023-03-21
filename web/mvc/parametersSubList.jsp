@@ -6,8 +6,9 @@
 <head>
     <%--@elvariable id="top" type="java.lang.String"--%>
     <%--@elvariable id="username" type="java.lang.String"--%>
+	<%--@elvariable id="parametersMainName" type="java.lang.String"--%>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <title>${username}账号管理</title>
+    <title>${parametersMainName}键值管理</title>
     <link href="${pageContext.request.contextPath}/css/bootstrap.min.css" rel="stylesheet">
     <link href="${pageContext.request.contextPath}/css/List.css" rel="stylesheet">
     <style type="text/css">
@@ -31,40 +32,31 @@
 <body>
 <center>
 <div class="c1"><%--@elvariable id="user" type="java.util.Map"--%>
-	<h2>账号管理</h2><%--@elvariable id="sum" type="int"--%>
+	<h2>${parametersMainName}键值管理</h2><%--@elvariable id="sum" type="int"--%>
 	<table border="1" class="table table-striped table-bordered table-condensed table-hover">
 		<tr><%--@elvariable id="bar" type="java.lang.String"--%>
 			<td colspan="${fn:length(top)}" align="left">当前用户:&nbsp;<span
-					class="fonts2">${user.name}</span></td>
+					class="fonts2">${user.name}</span>&nbsp;&nbsp;&nbsp;&nbsp;<a href="parametersMainList">返回</a></td>
 			<td align="center" >${bar}</td>
 		</tr>
 		<tr class="fonts3"><%--@elvariable id="translate" type="java.util.Map"--%>
 		<c:forEach var="temp" items="${top}">
-			<td>${translate.get(temp)}</td>
+			<td>${translate.get(temp)!=null?translate.get(temp):temp}</td>
 		</c:forEach>
 			<td>操作</td>
 		</tr><%--@elvariable id="list" type="java.util.List"--%>
 		<c:forEach var="temp" items="${list}">
 		<tr><%--@elvariable id="aidmap" type="java.util.Map"--%>
 			<c:forEach var="key" items="${top}">
-				<c:if test="${key=='password'}" var="if1" scope="page">
-					<td><span class="yc">${temp.get(key)}</span></td>
-				</c:if>
-				<c:if test="${key=='rank'}" var="if2" scope="page"><%--@elvariable id="parameters" type="java.util.LinkedHashMap"--%>
-					<td>${parameters.get("2").get(temp.get(key))}</td>
-				</c:if>
-				<c:if test="${not if1 and not if2}">
-					<td>${temp.get(key)}</td>
-				</c:if>
+				<td>${temp.get(key)}</td>
 			</c:forEach>
 			<td align="center">
-				<a onClick="return deleteDemo(`${temp.get('name')}`)" href="userDel?${top[0]}=${temp.get(top[0])}" class="fonts4">删除</a>|
-				<a href="userReset?${top[0]}=${temp.get(top[0])}">重置密码</a>|
-				<a href="userChangeRank?${top[0]}=${temp.get(top[0])}">修改权限</a>
+				<a onClick="return deleteDemo(`${temp.get('name')}`)" href="ParametersSubDel?psid=${temp.get('psid')}" class="fonts4">删除</a>|
+				<a href="parametersSubChange?psid=${temp.get('psid')}">修改</a>
 			</td>
 		</tr>
 		</c:forEach>
-		<tr><td colspan="${fn:length(top)+1}" align="center"><a class="fonts1" href="userInsert">添加账号</a></td></tr>
+		<tr><td colspan="${fn:length(top)+1}" align="center"><a class="fonts1" href="parametersSubInsert">添加参数</a></td></tr>
 	</table>
 </div>
 </center>

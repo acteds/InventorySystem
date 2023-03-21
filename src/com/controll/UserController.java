@@ -6,12 +6,14 @@ import com.dao.MySql;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 用户控制器
@@ -29,13 +31,15 @@ public class UserController {
     }
     @RequestMapping("/login")
     public String login(HttpServletRequest request){
-        //设置翻译图
-        request.getSession().setAttribute("translate", Translate.getTranslate());
+        ServletContext application= request.getSession().getServletContext();
+        //设置翻译字典和参数字典
+        application.setAttribute("translate", Translate.getTranslate());
+        application.setAttribute("parameters",ParametersController.initializationParameters(ms));
         return "login";
     }
     @RequestMapping("/Login")
     public String login(HttpServletRequest request, HttpServletResponse response, String username, String password) throws IOException {
-        ms.setSql("select * from user where username=? and password=?").set(username).set(password);
+        ms.setSql("select * from user where name=? and password=? and status=1").set(username).set(password);
         List<LinkedHashMap<String, Object>> list =ms.runList();
         if (list.size()==0){
             response.getWriter().print("<script>alert('登录失败');window.location='login'</script>");
@@ -50,40 +54,81 @@ public class UserController {
         request.getSession().invalidate();
         return "redirect:login";
     }
-    @RequestMapping("reg")
-    public String reg(HttpServletRequest request){
+    @RequestMapping("/userInsert")
+    public String userInsert(HttpServletRequest request){
         ms.setSql("select * from user").runList();
         String []top=ms.getTop();
-        top=Tools.delString(top,"id");
-        System.out.println(Arrays.toString(top));
-        request.getSession().setAttribute("top",top );
-        return "reg";
+        top=Tools.delString(top,"uid");
+        top=Tools.delString(top,"status");
+        request.getSession().setAttribute("top",top);
+        return "userInsert";
     }
-    @RequestMapping("/Reg")
-    public void reg(HttpServletRequest request, HttpServletResponse response,String username) throws IOException {
+    @RequestMapping("/UserInsert")
+    public void UserInsert(HttpServletRequest request, HttpServletResponse response,String username) throws IOException {
         String []top= (String[]) request.getSession().getAttribute("top");
-        ms.setSql("select * from user where username=?").set(username);
+        ms.setSql("select * from user where name=?").set(username);
         if(ms.runList().size()>0) {
-            response.getWriter().print("<script>alert('注册失败,名称重复');window.location='reg'</script>");
+            response.getWriter().print("<script>alert('添加用户失败,名称重复');window.location='userInsert'</script>");
             return;
         }
-        ms.setSql("insert into user value(0,?,?,?,?)");
+        ms.setSql("insert into user value(0,?,?,?,?,1)");
         for (String value : top) {
             String s = request.getParameter(value);
             ms.set(s);
         }
         if(ms.run()>0) {
-            response.setHeader("refresh", "0;URL=login");
+            response.setHeader("refresh", "0;URL=userList");
         } else {
-            response.getWriter().print("<script>alert('注册失败');window.location='reg'</script>");
+            response.getWriter().print("<script>alert('添加用户失败');window.location='userInsert'</script>");
         }
     }
     @RequestMapping("/userChange")
     public String userChange(HttpServletRequest request){
+        HttpSession session=request.getSession();
+        //noinspection unchecked
+        LinkedHashMap<String, Object> user=(LinkedHashMap<String,Object>)session.getAttribute("user");
+        ms.setSql("select * from user where uid=?").set(user.get("uid"));
+        ms.runList();
+        String [] top=Tools.delString(ms.getTop(),"uid");
+        top=Tools.delString(top,"status");
+        request.getSession().setAttribute("top",top);
         return "userChange";
     }
     @RequestMapping("/UserChange")
     public void userChange(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        HttpSession session=request.getSession();
+        //noinspection unchecked
+        LinkedHashMap<String, Object> user=(LinkedHashMap<String,Object>)session.getAttribute("user");
+        //----------------------------------------旧密码正确-------------------------------------------
+        //用户登录时记录的密码
+        String password0=user.get("password").toString();
+        //用户表单提交的旧密码
+        String password=request.getParameter("password0");
+        if(!(password0.equals(password))) {
+            response.getWriter().print("<script>alert('原密码错误');window.location='userChange'</script>");
+            return;
+        }
+        // ---------------------------------------查重(并可避免修改账号时登录其他人的账号与密码)-----------------------------
+        //用户修改后的登录名字
+        String name=request.getParameter("name");
+        //用户原登录名字
+        String name0=user.get("name").toString();
+        ms.setSql("SELECT * FROM user where name=?").set(name).runList();
+        //有记录且原名字与新名字不同
+        if (ms.getSum()!= 0&&!(name0.equals(name))) {
+            response.getWriter().print("<script>alert('用户名称已存在，请重新输入');window.location='userChange'</script>");
+            return;
+        }
+        // --------------------------------------------修改----------------------------------------------------
+        ms.setSql("UPDATE user SET name=?,password=?,phone=? WHERE uid=?");
+        String[]top=(String[]) session.getAttribute("top");
+        top=Tools.delString(top,"rank");
+        for (String string : top) {
+            ms.set(request.getParameter(string));
+        }
+        ms.set(Integer.parseInt(user.get("uid").toString()));
+        //调试方法
+        System.out.println('\n'+ms.getSql());
         if(ms.run()>0) {
             response.setHeader("refresh", "0;URL=Logout");
         } else {
@@ -92,10 +137,72 @@ public class UserController {
     }
     @RequestMapping("/userList")
     public String userList(HttpServletRequest request, HttpServletResponse response, String t) throws IOException {
+        HttpSession session = request.getSession();
+        //noinspection unchecked ---------------是否管理员-----------------------------------------------------------
+        Map<String, Object> user = (Map<String, Object>) session.getAttribute("user");
+        if (!("1".equals(user.get("uid").toString()))) {
+            response.getWriter().print("<script>alert('你不是管理员');</script>");
+            return null;
+        }
+        //----------------------------------------判断传值并写入session------------------------------------------------
+
+        ms.setSql("SELECT * from user where status=1 order by uid asc limit ?,?");
+        ms.runPagination(request, "/userList", 10);
+        request.setAttribute("sum", ms.getSum());
+        String [] top=Tools.delString(ms.getTop(),"status");
+        request.setAttribute("top", top);
+        //----------------------------------转发------------------------------------------------------------
         return "userList";
     }
     @RequestMapping("/userDel")
-    public void userDel(HttpServletRequest request, HttpServletResponse response,String tid,String sid) throws IOException {
+    public void userDel(HttpServletRequest request, HttpServletResponse response,String uid) throws IOException {
+        int i=ms.setSql("update user set status=0 where uid=?").set(uid).run();
+        System.out.println('\n'+ms.getSql());
+        if(i>0) {
+            response.getWriter().print("<script>alert('已删除');window.location='userList'</script>");
+        } else {
+            response.getWriter().print("<script>alert('删除失败');window.location='userList'</script>");
+        }
+    }
+    @RequestMapping("/userReset")
+    public void userReset(HttpServletRequest request, HttpServletResponse response,String uid) throws IOException {
+        HttpSession session=request.getSession();
+//        //noinspection unchecked ----------------是否管理员-----------------------------------------------------------
+//        LinkedHashMap<String, Object> user=(LinkedHashMap<String,Object>)session.getAttribute("user");
+//        if(!("管理员".equals(user.get("rank").toString()))){
+//            response.getWriter().print("<script>alert('你不是管理员');window.location='courseList'</script>");
+//            return;
+//        }
 
+        int i=ms.setSql("update user set password=name where uid=?").set(uid).run();
+        System.out.println('\n'+ms.getSql());
+        if(i>0) {
+            response.getWriter().print("<script>alert('已重置密码为账号名');window.location='userList'</script>");
+        } else {
+            response.getWriter().print("<script>alert('重置密码失败');window.location='userList'</script>");
+        }
+    }
+    @RequestMapping("/userChangeRank")
+    public String userChangeRank(HttpServletRequest request,String uid){
+        HttpSession session=request.getSession();
+        ms.setSql("select uid,name,`rank` from user where uid=?").set(Integer.parseInt(uid));
+        session.setAttribute("list",ms.runList());
+        session.setAttribute("top",ms.getTop());
+        session.setAttribute("uid",uid);
+        return "userChangeRank";
+    }
+    @RequestMapping("/UserChangeRank")
+    public void UserChangeRank(HttpServletRequest request, HttpServletResponse response,String rank) throws IOException {
+        HttpSession session=request.getSession();
+        // --------------------------------------------修改权限----------------------------------------------------
+        ms.setSql("UPDATE user SET `rank`=? WHERE uid=?").set(rank);
+        ms.set(Integer.parseInt(session.getAttribute("uid").toString()));
+        //调试方法
+        System.out.println('\n'+ms.getSql());
+        if(ms.run()>0) {
+            response.setHeader("refresh", "0;URL=userList");
+        } else {
+            response.getWriter().print("<script>alert('修改失败');window.location='userChangeRank'</script>");
+        }
     }
 }

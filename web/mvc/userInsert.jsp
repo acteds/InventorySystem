@@ -3,16 +3,16 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd" >
 <html>
 <head>
-    <title>在线健身管理系统注册</title>
+    <title>添加用户</title>
     <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/style.css">
     <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/media.css">
 </head>
 <body>
 <center>
 <div class="message">
-	<form name="form1" action="Reg" method="post" onsubmit="return notNull(this);">
+	<form name="form1" action="UserInsert" method="post" onsubmit="return notNull(this);">
 	<table width="317">
-		<tr><td colspan="2" class="title">在线健身管理系统注册</td></tr>
+		<tr><td colspan="2" class="title">添加用户</td></tr>
 		<tr><td width="100" align="right"></td><td width="217"></td>
 		</tr><%--@elvariable id="top" type="java.lang.String"--%>
 		<c:forEach var="st" items="${top}">
@@ -27,21 +27,18 @@
 				</tr>
 			</c:if>
 			<c:if test="${st=='rank'}" var="if2" scope="page">
-				<tr><%--@elvariable id="translate" type="java.util.Map"--%>
-					<td align="right">${translate.get(st)}:</td>
-					<td><input name="${st}" type="radio" value="1">教练
-						<input name="${st}" type="radio" value="2" checked="checked">用户
-					</td>
-				</tr>
+				<%--@elvariable id="translate" type="java.util.Map"--%>
+				<td align="right">${translate.get(st)}:</td>
+				<td><%--@elvariable id="aidkey" type="java.lang.String"--%>
+					<select name="${st}" id="sort" size="1">
+						<%--@elvariable id="parameters" type="java.util.LinkedHashMap"--%>
+						<c:forEach var="entry" items="${parameters.get('2')}">
+							<option value='${entry.key}'>${entry.value}</option>
+						</c:forEach>
+					</select>
+				</td>
 			</c:if>
-			<c:if test="${st=='description'}" var="if3" scope="page">
-				<tr><%--@elvariable id="translate" type="java.util.Map"--%>
-					<td align="right">${translate.get(st)}:</td>
-					<td><textarea name="${st}" style="width: 166px;"></textarea>
-					</td>
-				</tr>
-			</c:if>
-			<c:if test="${not if1 && not if2 && not if3}">
+			<c:if test="${not if1 && not if2}">
 				<tr><%--@elvariable id="translate" type="java.util.Map"--%>
 					<td align="right">${translate.get(st)}:</td>
 					<td><input name="${st}" type="text"></td>
@@ -52,7 +49,7 @@
 			<td colspan="2" align="center" style="padding-top: 10px">
 				<input name="start" type="submit" value="注册" class="botton">
 				<input name="reset" type="reset" value="重置" class="botton">
-				<a href="login"><input name="button" type="button" value="返回" class="botton"></a>
+				<a href="userList"><input name="button" type="button" value="返回" class="botton"></a>
 			</td>
 		</tr>
 	</table>
