@@ -13,7 +13,6 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 用户控制器
@@ -25,6 +24,15 @@ public class UserController {
     /**数据库操作类*/
     private MySql ms;
     public UserController(MySql ms) {this.ms = ms;}
+    public static LinkedHashMap<String, String> initializationUser(MySql mySql){
+        mySql.setSql("select uid,name from user");
+        List<LinkedHashMap<String, Object>> list = mySql.runList();
+        LinkedHashMap<String, String> map = new LinkedHashMap<>();
+        for (LinkedHashMap<String, Object> temp : list) {
+            map.put(temp.get("uid").toString(), temp.get("name").toString());
+        }
+        return map;
+    }
     @RequestMapping("/main")
     public String main(){
         return "main";
@@ -32,9 +40,11 @@ public class UserController {
     @RequestMapping("/login")
     public String login(HttpServletRequest request){
         ServletContext application= request.getSession().getServletContext();
-        //设置翻译字典和参数字典
+        //设置翻译图,参数图,货品图,用户图
         application.setAttribute("translate", Translate.getTranslate());
         application.setAttribute("parameters",ParametersController.initializationParameters(ms));
+        application.setAttribute("goodsMap",GoodsController.initializationGoods(ms));
+        application.setAttribute("userMap",UserController.initializationUser(ms));
         return "login";
     }
     @RequestMapping("/Login")
@@ -77,6 +87,8 @@ public class UserController {
             ms.set(s);
         }
         if(ms.run()>0) {
+            ServletContext application= request.getSession().getServletContext();
+            application.setAttribute("userMap",UserController.initializationUser(ms));
             response.setHeader("refresh", "0;URL=userList");
         } else {
             response.getWriter().print("<script>alert('添加用户失败');window.location='userInsert'</script>");
@@ -113,9 +125,9 @@ public class UserController {
         String name=request.getParameter("name");
         //用户原登录名字
         String name0=user.get("name").toString();
-        ms.setSql("SELECT * FROM user where name=?").set(name).runList();
+        ms.setSql("SELECT * FROM user where name=? and uid!=?").set(name).set(user.get("uid")).runList();
         //有记录且原名字与新名字不同
-        if (ms.getSum()!= 0&&!(name0.equals(name))) {
+        if (ms.getSum()!= 0) {
             response.getWriter().print("<script>alert('用户名称已存在，请重新输入');window.location='userChange'</script>");
             return;
         }
@@ -127,55 +139,38 @@ public class UserController {
             ms.set(request.getParameter(string));
         }
         ms.set(Integer.parseInt(user.get("uid").toString()));
-        //调试方法
-        System.out.println('\n'+ms.getSql());
         if(ms.run()>0) {
+            ServletContext application= request.getSession().getServletContext();
+            application.setAttribute("userMap",UserController.initializationUser(ms));
             response.setHeader("refresh", "0;URL=Logout");
         } else {
             response.getWriter().print("<script>alert('修改失败');window.location='userChange'</script>");
         }
     }
     @RequestMapping("/userList")
-    public String userList(HttpServletRequest request, HttpServletResponse response, String t) throws IOException {
-        HttpSession session = request.getSession();
-        //noinspection unchecked ---------------是否管理员-----------------------------------------------------------
-        Map<String, Object> user = (Map<String, Object>) session.getAttribute("user");
-        if (!("1".equals(user.get("uid").toString()))) {
-            response.getWriter().print("<script>alert('你不是管理员');</script>");
-            return null;
-        }
+    public String userList(HttpServletRequest request) {
         //----------------------------------------判断传值并写入session------------------------------------------------
-
         ms.setSql("SELECT * from user where status=1 order by uid asc limit ?,?");
         ms.runPagination(request, "/userList", 10);
-        request.setAttribute("sum", ms.getSum());
         String [] top=Tools.delString(ms.getTop(),"status");
         request.setAttribute("top", top);
         //----------------------------------转发------------------------------------------------------------
         return "userList";
     }
     @RequestMapping("/userDel")
-    public void userDel(HttpServletRequest request, HttpServletResponse response,String uid) throws IOException {
+    public void userDel(HttpServletRequest request,HttpServletResponse response, String uid) throws IOException {
         int i=ms.setSql("update user set status=0 where uid=?").set(uid).run();
-        System.out.println('\n'+ms.getSql());
         if(i>0) {
+            ServletContext application= request.getSession().getServletContext();
+            application.setAttribute("userMap",UserController.initializationUser(ms));
             response.getWriter().print("<script>alert('已删除');window.location='userList'</script>");
         } else {
             response.getWriter().print("<script>alert('删除失败');window.location='userList'</script>");
         }
     }
     @RequestMapping("/userReset")
-    public void userReset(HttpServletRequest request, HttpServletResponse response,String uid) throws IOException {
-        HttpSession session=request.getSession();
-//        //noinspection unchecked ----------------是否管理员-----------------------------------------------------------
-//        LinkedHashMap<String, Object> user=(LinkedHashMap<String,Object>)session.getAttribute("user");
-//        if(!("管理员".equals(user.get("rank").toString()))){
-//            response.getWriter().print("<script>alert('你不是管理员');window.location='courseList'</script>");
-//            return;
-//        }
-
+    public void userReset(HttpServletResponse response, String uid) throws IOException {
         int i=ms.setSql("update user set password=name where uid=?").set(uid).run();
-        System.out.println('\n'+ms.getSql());
         if(i>0) {
             response.getWriter().print("<script>alert('已重置密码为账号名');window.location='userList'</script>");
         } else {

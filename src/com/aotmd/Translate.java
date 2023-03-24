@@ -22,6 +22,14 @@ public class Translate {
 
 		map.put("psid","键值对序号");
 		map.put("value","值");
+
+		map.put("gid","货品序号");
+
+		map.put("iid","清单号");
+		map.put("quantity","数量");
+		map.put("location","位置");
+		map.put("createTime","创建时间");
+		map.put("review","审核状态");
 		return map;
 	}
 

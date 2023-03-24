@@ -22,7 +22,7 @@ interface MySqlDao{
  * 	常见用法:List&lt;LinkedHashMap&lt;String, Object&gt;&gt; list=ms.setSql("select * from linkman where
  * name=?").set("张三").runlist();
  * <p>
- *
+ * @date 2023-3-23
  * @author aotmd
  */
 @Repository
@@ -42,7 +42,9 @@ public class MySql {
 		this.mySqlDao = mySqlDao;
 		login();
 	}
-
+    public Boolean checkConnections() throws SQLException {
+	    return conn.isClosed();
+    }
 //	/**
 //	 * 默认构造方法
 //	 */
@@ -56,6 +58,10 @@ public class MySql {
 		sum = 0;
 		index=1;
 		try {
+		    //检查连接存活状态
+            if (checkConnections()){
+                login();
+            }
 			ps = conn.prepareStatement(sql);
 		} catch (SQLException e) {
 			e.printStackTrace();

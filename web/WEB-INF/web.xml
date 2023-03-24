@@ -6,14 +6,17 @@
 <welcome-file-list>
     <welcome-file>index.jsp</welcome-file>
 </welcome-file-list>
-    <!--实例化ApplicationContext容器-->
-    <context-param>
-        <param-name>contextConfigLocation</param-name>
-        <param-value>classpath:com/dao/SpringMyBatis.xml</param-value><!--加载src目录下的SpringMyBatis.xml文件-->
-    </context-param>
-    <!--指定以ContextLoaderListener方式启动Spring容器-->
-    <listener><listener-class>org.springframework.web.context.ContextLoaderListener</listener-class></listener>
-    <!--前端控制器DispatcherServlet-->
+<session-config>
+    <session-timeout>90</session-timeout>
+</session-config>
+<!--实例化ApplicationContext容器-->
+<context-param>
+    <param-name>contextConfigLocation</param-name>
+    <param-value>classpath:com/dao/SpringMyBatis.xml</param-value><!--加载src目录下的SpringMyBatis.xml文件-->
+</context-param>
+<!--指定以ContextLoaderListener方式启动Spring容器-->
+<listener><listener-class>org.springframework.web.context.ContextLoaderListener</listener-class></listener>
+<!--前端控制器DispatcherServlet-->
 <servlet>
     <servlet-name>springmvc</servlet-name>
     <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>

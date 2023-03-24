@@ -4,44 +4,49 @@
 <html><%--@elvariable id="top" type="java.lang.String"--%>
 <head><%--@elvariable id="translate" type="java.util.Map"--%>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <title>修改参数名称</title>
+    <title>添加货品入库单</title>
     <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/style.css">
     <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/media.css">
 </head>
 <body>
 <center>
 <div class="message">
-<form name="form1" action="ParametersMainChange" method="post" onsubmit="return NotNull();">
+<form name="form1" action="InventoryAddInsert" method="post" onsubmit="return NotNull();">
     <table width="317">
-        <tr><td colspan="2" class="title">修改参数名称</td></tr>
+        <tr><td colspan="2" class="title">添加货品入库单</td></tr>
         <tr><td width="100" align="right"></td><td width="217"></td>
         </tr>
-        <%--@elvariable id="list" type="java.util.LinkedHashMap"--%>
         <c:forEach var="st" items="${top}">
             <c:if test="${st== 'explanation'}" var="if1" scope="page">
                 <tr>
                     <td align="right">${translate.get(st)}:</td>
-                    <td><textarea style="width: 166px;" name="${st}">${list.get(st)}</textarea></td>
+                    <td><textarea style="width: 166px;" name="${st}"></textarea></td>
                 </tr>
             </c:if>
-            <c:if test="${st=='pmid'}" var="if2" scope="page">
-                <tr>
-                    <td align="right">${translate.get(st)}:</td>
-                    <td><input name="${st}" type="text" style="width: 167px;" value="${list.get(st)}" disabled="disabled"></td>
-                </tr>
+            <c:if test="${st=='gid'}" var="if2" scope="page">
+                <%--@elvariable id="translate" type="java.util.Map"--%>
+                <%--@elvariable id="goodsMap" type="java.util.Map"--%>
+                <td align="right">${translate.get(st)}:</td>
+                <td>
+                    <select name="${st}" id="sort" size="1">
+                        <c:forEach var="entry" items="${goodsMap}">
+                            <option value='${entry.key}'>${entry.value}</option>
+                        </c:forEach>
+                    </select>
+                </td>
             </c:if>
             <c:if test="${not if1 and not if2}">
                 <tr>
                     <td align="right">${translate.get(st)}:</td>
-                    <td><input name="${st}" type="text" style="width: 167px;" value="${list.get(st)}"></td>
+                    <td><input name="${st}" type="text" style="width: 167px;" value=""></td>
                 </tr>
             </c:if>
         </c:forEach>
         <tr>
             <td colspan="2" align="center" style="padding-top: 10px">
-                <input name="start" type="submit" value="修改" class="botton">
+                <input name="start" type="submit" value="添加" class="botton">
                 <input name="reset" type="reset" value="重置" class="botton">
-                <a href="parametersMainList"><input name="button" type="button" value="返回" class="botton"></a>
+                <a href="inventoryAddList"><input name="button" type="button" value="返回" class="botton"></a>
             </td>
         </tr>
     </table>

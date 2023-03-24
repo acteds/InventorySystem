@@ -9,7 +9,7 @@
     <title>${user.name}用户信息修改</title>
     <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/style.css">
     <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/media.css">
-	<style type="text/css">.fonts2 {background-color: #EBEBE4;}</style>
+	<style type="text/css">.fonts2 {background-color: #eeebe5;border: 1px black solid;}</style>
 </head>
 <body>
 <center>

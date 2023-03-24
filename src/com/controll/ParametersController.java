@@ -5,6 +5,7 @@ import com.dao.MySql;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -12,7 +13,8 @@ import java.io.IOException;
 import java.util.*;
 
 /**
- * @author 参数控制器
+ * 参数控制器
+ * @author aotmd
  * @version 1.0
  * @date 2023/3/20 15:42
  */
@@ -46,20 +48,11 @@ public class ParametersController {
         return parametersList;
     }
     @RequestMapping("/parametersMainList")
-    public String parametersMainList(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        HttpSession session = request.getSession();
-        //noinspection unchecked ---------------是否管理员-----------------------------------------------------------
-        Map<String, Object> user = (Map<String, Object>) session.getAttribute("user");
-        if (!("1".equals(user.get("uid").toString()))) {
-            response.getWriter().print("<script>alert('你不是管理员');</script>");
-            return null;
-        }
+    public String parametersMainList(HttpServletRequest request) {
         //----------------------------------------判断传值并写入session------------------------------------------------
-
         ms.setSql("SELECT pm.*,(SELECT count(ps.pmid) FROM parameters_sub ps WHERE pm.pmid=ps.pmid) as ParametersSubCount " +
                 "from parameters_main pm order by pmid asc limit ?,?");
         ms.runPagination(request, "/parametersMainList", 10);
-        request.setAttribute("sum", ms.getSum());
         request.setAttribute("top", ms.getTop());
         //----------------------------------转发------------------------------------------------------------
         return "parametersMainList";
@@ -69,7 +62,6 @@ public class ParametersController {
         ms.setSql("select * from parameters_main").runList();
         String []top=ms.getTop();
         top=Tools.delString(top,"pmid");
-        System.out.println(Arrays.toString(top));
         request.getSession().setAttribute("top",top);
         return "parametersMainInsert";
     }
@@ -95,18 +87,18 @@ public class ParametersController {
     @RequestMapping("/parametersMainChange")
     public String parametersMainChange(HttpServletRequest request,String pmid){
         ms.setSql("select * from parameters_main where pmid=?").set(pmid);
-        LinkedHashMap<String, Object> parametersMain=ms.runList().get(0);
+        LinkedHashMap<String, Object> list=ms.runList().get(0);
         request.getSession().setAttribute("top",ms.getTop());
-        request.getSession().setAttribute("parametersMain",parametersMain);
+        request.getSession().setAttribute("list",list);
         return "parametersMainChange";
     }
     @RequestMapping("/ParametersMainChange")
     public void ParametersMainChange(HttpServletRequest request, HttpServletResponse response,String name) throws IOException {
         HttpSession session=request.getSession();
-        LinkedHashMap<String, Object> parametersMain=((LinkedHashMap<String, Object>) session.getAttribute("parametersMain"));
+        LinkedHashMap<String, Object> list=((LinkedHashMap<String, Object>) session.getAttribute("list"));
         // ---------------------------------------查重-----------------------------
         //原名字
-        String name0= parametersMain.get("name").toString();
+        String name0= list.get("name").toString();
         ms.setSql("SELECT * FROM parameters_main where name=?").set(name).runList();
         //有记录且原名字与新名字不同
         if (ms.getSum()!= 0&&!(name0.equals(name))) {
@@ -120,7 +112,7 @@ public class ParametersController {
         for (String string : top) {
             ms.set(request.getParameter(string));
         }
-        ms.set(Integer.parseInt(parametersMain.get("pmid").toString()));
+        ms.set(Integer.parseInt(list.get("pmid").toString()));
         //调试方法
         System.out.println('\n'+ms.getSql());
         if(ms.run()>0) {
@@ -130,14 +122,7 @@ public class ParametersController {
         }
     }
     @RequestMapping("/ParametersMainDel")
-    public void ParametersMainDel(HttpServletRequest request, HttpServletResponse response,String pmid) throws IOException {
-        HttpSession session = request.getSession();
-        //noinspection unchecked --------------是否管理员--------------------------------------------------------
-//        Map<String, Object> user = (Map<String, Object>) session.getAttribute("user");
-//        if (!("超级管理员".equals(user.get("rank").toString()))) {
-//            response.getWriter().print("<script>alert('你不是管理员');window.location='parametersMainList'</script>");
-//            return;
-//        }
+    public void ParametersMainDel(HttpServletResponse response, String pmid) throws IOException {
         //-----------------------------------判断是否有传值-----------------------------------------------------------------
         if (pmid == null) {
             response.getWriter().print("<script>alert('非法访问没有传值');window.location='parametersMainList'</script>");
@@ -151,8 +136,6 @@ public class ParametersController {
         }
         //----------------------------------------删除-------------------------------------------------------------------
         ms.setSql("DELETE FROM parameters_main where pmid=?").set(Integer.parseInt(pmid));
-        //调试方法
-        System.out.println('\n'+ms.getSql());
         if (ms.run() > 0) {
             response.setHeader("refresh", "0;URL=parametersMainList");
         } else {
@@ -162,12 +145,6 @@ public class ParametersController {
     @RequestMapping("/parametersSubList")
     public String parametersSubList(HttpServletRequest request, HttpServletResponse response,String pmid,String name) {
         HttpSession session = request.getSession();
-        //noinspection unchecked ---------------是否管理员-----------------------------------------------------------
-//        Map<String, Object> user = (Map<String, Object>) session.getAttribute("user");
-//        if (!("1".equals(user.get("uid").toString()))) {
-//            response.getWriter().print("<script>alert('你不是管理员');</script>");
-//            return null;
-//        }
         //----------------------------------------判断传值并写入session------------------------------------------------
         if (pmid!=null&&name!=null){
             session.setAttribute("parametersMainID",pmid);
@@ -180,7 +157,6 @@ public class ParametersController {
         ms.runPagination(request, "/parametersSubList", 10);
         String []top=ms.getTop();
         top=Tools.delString(top,"psid");
-        request.setAttribute("sum", ms.getSum());
         request.setAttribute("top", top);
 
         //----------------------------------转发------------------------------------------------------------
@@ -192,27 +168,29 @@ public class ParametersController {
         String []top=ms.getTop();
         top=Tools.delString(top,"pmid");
         top=Tools.delString(top,"psid");
-        System.out.println(Arrays.toString(top));
         request.getSession().setAttribute("top",top);
         return "parametersSubInsert";
     }
     @RequestMapping("/ParametersSubInsert")
     public void ParametersSubInsert(HttpServletRequest request, HttpServletResponse response,String name,String value) throws IOException {
+        int pmid= Integer.parseInt((String) request.getSession().getAttribute("parametersMainID"));
         // ---------------------------------------查重-----------------------------
         String []top= (String[]) request.getSession().getAttribute("top");
-        ms.setSql("SELECT * FROM parameters_sub where name=? or value=?").set(name).set(value);
+        ms.setSql("SELECT * FROM parameters_sub where pmid=? and( name=? or value=?)").set(pmid).set(name).set(value);
         if(ms.runList().size()>0) {
             response.getWriter().print("<script>alert('添加参数失败,名称或值重复，请重新输入');window.history.go(-1);</script>");
             return;
         }
 
-        int pmid= Integer.parseInt((String) request.getSession().getAttribute("parametersMainID"));
         ms.setSql("insert into parameters_sub value(0,?,?,?,?)").set(pmid);
         for (String temp : top) {
             String s = request.getParameter(temp);
             ms.set(s);
         }
         if(ms.run()>0) {
+            /*更新图*/
+            ServletContext application= request.getSession().getServletContext();
+            application.setAttribute("parameters",ParametersController.initializationParameters(ms));
             response.setHeader("refresh", "0;URL=parametersSubList");
         } else {
             response.getWriter().print("<script>alert('添加参数失败');window.location='parametersSubList'</script>");
@@ -221,19 +199,21 @@ public class ParametersController {
     @RequestMapping("/parametersSubChange")
     public String parametersSubChange(HttpServletRequest request,String psid){
         ms.setSql("select * from parameters_sub where psid=?").set(psid);
-        LinkedHashMap<String, Object> parametersSub=ms.runList().get(0);
+        LinkedHashMap<String, Object> list=ms.runList().get(0);
         request.getSession().setAttribute("top",ms.getTop());
-        request.getSession().setAttribute("parametersSub",parametersSub);
+        request.getSession().setAttribute("list",list);
         return "parametersSubChange";
     }
     @RequestMapping("/ParametersSubChange")
     public void ParametersSubChange(HttpServletRequest request, HttpServletResponse response,String name,String value) throws IOException {
         HttpSession session=request.getSession();
-        LinkedHashMap<String, Object> parametersSub=((LinkedHashMap<String, Object>) session.getAttribute("parametersSub"));
+        LinkedHashMap<String, Object> list=((LinkedHashMap<String, Object>) session.getAttribute("list"));
         // ---------------------------------------查重-----------------------------
-        int psid= Integer.parseInt(parametersSub.get("psid").toString());
-        ms.setSql("SELECT * FROM parameters_sub where psid !=? and ( name=? or value=? )").set(psid).set(name).set(value);
-        List<LinkedHashMap<String, Object>> result = ms.runList();
+        int psid= Integer.parseInt(list.get("psid").toString());
+        int pmid= Integer.parseInt((String) session.getAttribute("parametersMainID"));
+        ms.setSql("SELECT * FROM parameters_sub where pmid=? and psid !=? and ( name=? or value=? )")
+                .set(pmid).set(psid).set(name).set(value);
+        ms.runList();
         //有记录
         if (ms.getSum()!= 0) {
             response.getWriter().print("<script>alert('名称或值已存在，请重新输入');window.history.go(-1);</script>");
@@ -248,9 +228,10 @@ public class ParametersController {
             ms.set(request.getParameter(string));
         }
         ms.set(psid);
-        //调试方法
-        System.out.println('\n'+ms.getSql());
         if(ms.run()>0) {
+            /*更新图*/
+            ServletContext application= request.getSession().getServletContext();
+            application.setAttribute("parameters",ParametersController.initializationParameters(ms));
             response.setHeader("refresh", "0;URL=parametersSubList");
         } else {
             response.getWriter().print("<script>alert('修改失败');window.history.go(-1);");
@@ -258,13 +239,6 @@ public class ParametersController {
     }
     @RequestMapping("/ParametersSubDel")
     public void ParametersSubDel(HttpServletRequest request, HttpServletResponse response,String psid) throws IOException {
-        HttpSession session = request.getSession();
-        //noinspection unchecked --------------是否管理员--------------------------------------------------------
-//        Map<String, Object> user = (Map<String, Object>) session.getAttribute("user");
-//        if (!("超级管理员".equals(user.get("rank").toString()))) {
-//            response.getWriter().print("<script>alert('你不是管理员');window.location='parametersMainList'</script>");
-//            return;
-//        }
         //-----------------------------------判断是否有传值-----------------------------------------------------------------
         if (psid == null) {
             response.getWriter().print("<script>alert('非法访问没有传值');window.location='parametersSubList'</script>");
@@ -272,9 +246,10 @@ public class ParametersController {
         }
         //----------------------------------------删除-------------------------------------------------------------------
         ms.setSql("DELETE FROM parameters_sub where psid=?").set(Integer.parseInt(psid));
-        //调试方法
-        System.out.println('\n'+ms.getSql());
         if (ms.run() > 0) {
+            /*更新图*/
+            ServletContext application= request.getSession().getServletContext();
+            application.setAttribute("parameters",ParametersController.initializationParameters(ms));
             response.setHeader("refresh", "0;URL=parametersSubList");
         } else {
             response.getWriter().print("<script>alert('删除失败');window.location='parametersSubList'</script>");

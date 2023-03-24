@@ -9,7 +9,7 @@
 <script src="${pageContext.request.contextPath}/js/jquery.min.js"></script>
 
 <!--阿里图标库-->
-<link rel="stylesheet" type="text/css" href="https://at.alicdn.com/t/c/font_3449887_js4ad1moah.css" />
+<link rel="stylesheet" type="text/css" href="https://at.alicdn.com/t/c/font_3449887_8rfnnvlr76i.css" />
 
 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/main.css">
 
@@ -48,6 +48,14 @@
                             <a href="Logout"></a>
                         </label>
                     </li>
+                    <li>
+                        <label>
+                            <i class="iconfont icon-shuaxin"></i>
+                            <span>刷新</span>
+                            <i class="iconfont icon-xiangqing2"></i>
+                            <a href="javaScript:document.getElementsByName('iframe_a')[0].contentWindow.location.reload();"></a>
+                        </label>
+                    </li>
                     <c:if test="${user.rank=='学生'}">
 <%--                    <li>--%>
 <%--                        <label>--%>
@@ -72,7 +80,7 @@
                             <i class="iconfont icon-cangkuchaxunguanli"></i>
                             <span>库存查询</span>
                             <i class="iconfont icon-xiangqing2"></i>
-                            <a href="userList?t=1" target="iframe_a"></a>
+                            <a href="publicInventorySumList" target="iframe_a"></a>
                         </label>
                     </li>
                     <li>
@@ -80,7 +88,7 @@
                             <i class="iconfont icon-rukudan"></i>
                             <span>入库管理</span>
                             <i class="iconfont icon-xiangqing2"></i>
-                            <a href="courseList" target="iframe_a"></a>
+                            <a href="inventoryAddList" target="iframe_a"></a>
                         </label>
                     </li>
                     <li>
@@ -97,7 +105,7 @@
                             <i class="iconfont icon-lishidingdan"></i>
                             <span>入库审批</span>
                             <i class="iconfont icon-xiangqing2"></i>
-                            <a href="assnList" target="iframe_a"></a>
+                            <a href="inventoryReviewAddList" target="iframe_a"></a>
                         </label>
                     </li>
                     <li>
@@ -121,7 +129,7 @@
                             <i class="iconfont icon-huopinxinxi"></i>
                             <span>货品管理</span>
                             <i class="iconfont icon-xiangqing2"></i>
-                            <a href="userList?t=1" target="iframe_a"></a>
+                            <a href="goodsList?t=1" target="iframe_a"></a>
                         </label>
                     </li>
                     <li>
