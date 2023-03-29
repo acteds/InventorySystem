@@ -79,7 +79,7 @@ public class InventoryAddController {
     }
     @RequestMapping("/inventoryAddChange")
     public String inventoryAddChange(HttpServletRequest request,String iid){
-        ms.setSql("select * from inventory where iid=?").set(iid);
+        ms.setSql("select * from inventory where iid=? and status=0").set(iid);
         LinkedHashMap<String, Object> list=ms.runList().get(0);
         String []top=ms.getTop();
         top= Tools.delString(top,"uid");
@@ -93,11 +93,15 @@ public class InventoryAddController {
     @RequestMapping("/InventoryAddChange")
     public void InventoryAddChange(HttpServletRequest request, HttpServletResponse response,String iid) throws IOException {
         HttpSession session=request.getSession();
-        //todo 已审核则不能修改.
+        ms.setSql("select * from inventory where review>=10 and iid=? and status=0").set(Integer.parseInt(iid));
+        if (ms.runList().size()>0){
+            response.getWriter().print("<script>alert('已经审核通过了,无法修改.');window.history.go(-1);</script>");
+            return;
+        }
 
         // --------------------------------------------修改----------------------------------------------------
         //若审核失败可以通过修改内容重新进入审核状态.
-        ms.setSql("UPDATE inventory SET gid=?,quantity=?,location=?,explanation=?,review=0 WHERE iid=?");
+        ms.setSql("UPDATE inventory SET gid=?,quantity=?,location=?,explanation=?,review=0 WHERE iid=? and status=0");
         String[]top=(String[]) session.getAttribute("top");
         top= Tools.delString(top,"createTime");
         for (String string : top) {
@@ -106,19 +110,29 @@ public class InventoryAddController {
         ms.set(Integer.parseInt(iid));
         if(ms.run()>0) {
             response.setHeader("refresh", "0;URL=inventoryAddList");
-        } else {
-            response.getWriter().print("<script>alert('修改失败');window.history.go(-1);");
+            return;
         }
+        response.getWriter().print("<script>alert('修改失败');window.history.go(-1);</script>");
     }
-    @RequestMapping("/InventoryAddDel")
-    public void InventoryAddDel(HttpServletResponse response, String iid) throws IOException {
-        //----------------------------------------删除-------------------------------------------------------------------
-        ms.setSql("DELETE FROM inventory where iid=? and review=0").set(Integer.parseInt(iid));
-        if (ms.run() > 0) {
-            response.setHeader("refresh", "0;URL=inventoryAddList");
-        } else {
-            response.getWriter().print("<script>alert('删除失败');window.location='inventoryAddList'</script>");
+    @RequestMapping("/inventoryAddDel")
+    public void inventoryAddDel(HttpServletResponse response, int iid) throws IOException {
+        //查询审核状态
+        ms.setSql("select review from inventory where iid=? and status=0").set(iid);
+        int review=Integer.parseInt(ms.runList().get(0).get("review").toString());
+        if (review>=10){
+            response.getWriter().print("<script>alert('已经审核通过了,无法删除.');window.location='inventoryAddList';</script>");
+            return;
         }
+        //----------------------------------------删除-------------------------------------------------------------------
+        ms.setSql("DELETE FROM inventory where iid=? and status=0").set(iid);
+        if (ms.run() > 0) {
+            //一并删除审核记录
+            ms.setSql("DELETE FROM inventory_review where iid=?").set(iid);
+            ms.run();
+            response.setHeader("refresh", "0;URL=inventoryAddList");
+            return;
+        }
+        response.getWriter().print("<script>alert('删除失败');window.location='inventoryAddList';</script>");
     }
 
     /**
@@ -170,7 +184,11 @@ public class InventoryAddController {
         HttpSession session=request.getSession();
         int iid=Integer.parseInt((String) session.getAttribute("iid"));
         int uid=Integer.parseInt(((LinkedHashMap<String,Object>) session.getAttribute("user")).get("uid").toString());
-        //todo 已审核通过则不能修改.
+        ms.setSql("select * from inventory where review>=10 and iid=?").set(iid);
+        if (ms.runList().size()>0){
+            response.getWriter().print("<script>alert('已经审核通过了,无法修改.');window.history.go(-1);</script>");
+            return;
+        }
 
         // --------------------------------------------修改----------------------------------------------------
         ms.setSql("select * from inventory_review where iid=?").set(iid);
@@ -185,10 +203,10 @@ public class InventoryAddController {
             if(ms.run()>0) {
                 response.setHeader("refresh", "0;URL=inventoryReviewAddList");
             } else {
-                response.getWriter().print("<script>alert('修改失败');window.history.go(-1);");
+                response.getWriter().print("<script>alert('修改失败');window.history.go(-1);</script>");
             }
         } else {
-            response.getWriter().print("<script>alert('修改失败');window.history.go(-1);");
+            response.getWriter().print("<script>alert('修改失败');window.history.go(-1);</script>");
         }
     }
     @RequestMapping("/inventoryReviewAddInfo")
@@ -219,7 +237,7 @@ public class InventoryAddController {
             if(ms.run()>0) {
                 response.setHeader("refresh", "0;URL=inventoryAddList");
             } else {
-                response.getWriter().print("<script>alert('确认消息失败');window.history.go(-1);");
+                response.getWriter().print("<script>alert('确认消息失败');window.history.go(-1);</script>");
             }
         }else {
             response.setHeader("refresh", "0;URL=inventoryAddList");

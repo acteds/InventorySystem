@@ -234,7 +234,7 @@ public class ParametersController {
             application.setAttribute("parameters",ParametersController.initializationParameters(ms));
             response.setHeader("refresh", "0;URL=parametersSubList");
         } else {
-            response.getWriter().print("<script>alert('修改失败');window.history.go(-1);");
+            response.getWriter().print("<script>alert('修改失败');window.history.go(-1);</script>");
         }
     }
     @RequestMapping("/ParametersSubDel")

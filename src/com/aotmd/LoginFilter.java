@@ -28,7 +28,7 @@ public class LoginFilter implements HandlerInterceptor {
 		/*排除拦截的网址*/
 		String[] path = { "/login", "/Login", "/reg", "/Reg"};
 		/*排除的扩展名*/
-		String[] extensionName = { ".css", ".js", ".png", ".jpg" };
+		String[] extensionName = { ".css", ".js", ".png", ".jpg", ".ttf", ".woff", ".woff2" };
 		/*设置网址取不到点号时的默认值*/
 		int uriLast = requestUri.lastIndexOf(".") != -1 ? requestUri.lastIndexOf(".") : 0;
 

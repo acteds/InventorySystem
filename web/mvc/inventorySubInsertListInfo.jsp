@@ -36,8 +36,8 @@
 	<h2>${goodsName}详细信息</h2><%--@elvariable id="sum" type="int"--%>
 	<table border="1" class="table table-striped table-bordered table-condensed table-hover">
 		<tr><%--@elvariable id="bar" type="java.lang.String"--%>
-			<td colspan="${fn:length(top)-1}" align="left">当前用户:&nbsp;<span
-					class="fonts2">${user.name}</span>&nbsp;&nbsp;&nbsp;&nbsp;<a href="publicInventorySumList">返回</a></td>
+			<td colspan="${fn:length(top)}" align="left">当前用户:&nbsp;<span
+					class="fonts2">${user.name}</span>&nbsp;&nbsp;&nbsp;&nbsp;<a href="inventorySubInsertList">返回</a></td>
 			<td align="center" >${bar}</td>
 		</tr>
 		<tr class="fonts3"><%--@elvariable id="translate" type="java.util.Map"--%>
@@ -49,6 +49,7 @@
 				<td>${translate.get(temp)!=null?translate.get(temp):temp}</td>
 			</c:if>
 		</c:forEach>
+			<td>操作</td>
 		</tr><%--@elvariable id="list" type="java.util.List"--%>
 		<c:forEach var="temp" items="${list}">
 		<tr><%--@elvariable id="userMap" type="java.util.LinkedHashMap"--%>
@@ -63,9 +64,12 @@
 					<td>${temp.get(key)}</td>
 				</c:if>
 			</c:forEach>
+			<td align="center">
+				<a href="inventorySubInsert?${top[0]}=${temp.get(top[0])}">出库</a>
+			</td>
 		</tr>
 		</c:forEach>
-		<tr><td colspan="${fn:length(top)}" align="center">&nbsp;</td></tr>
+		<tr><td colspan="${fn:length(top)+1}" align="center">&nbsp;</td></tr>
 	</table>
 </div>
 </center>

@@ -111,7 +111,7 @@ public class GoodsController {
             application.setAttribute("goods",GoodsController.initializationGoods(ms));
             response.setHeader("refresh", "0;URL=goodsList");
         } else {
-            response.getWriter().print("<script>alert('修改失败');window.history.go(-1);");
+            response.getWriter().print("<script>alert('修改失败');window.history.go(-1);</script>");
         }
     }
     @RequestMapping("/GoodsDel")
@@ -122,7 +122,11 @@ public class GoodsController {
             response.getWriter().print("<script>alert('非法访问没有传值');window.location='goodsList'</script>");
             return;
         }
-        //todo 待库存表关联
+        ms.setSql("select * from inventory where gid=?").set(Integer.parseInt(gid));
+        if (ms.runList().size()>0){
+            response.getWriter().print("<script>alert('删除失败,仓库已存在货品');window.location='goodsList'</script>");
+            return;
+        }
         //----------------------------------------删除-------------------------------------------------------------------
         ms.setSql("DELETE FROM goods where gid=?").set(Integer.parseInt(gid));
         if (ms.run() > 0) {

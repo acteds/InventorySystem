@@ -9,7 +9,8 @@
 <script src="${pageContext.request.contextPath}/js/jquery.min.js"></script>
 
 <!--阿里图标库-->
-<link rel="stylesheet" type="text/css" href="https://at.alicdn.com/t/c/font_3449887_8rfnnvlr76i.css" />
+<%--<link rel="stylesheet" type="text/css" href="https://at.alicdn.com/t/c/font_3449887_8rfnnvlr76i.css" />--%>
+<link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/font/iconfont.css" />
 
 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/main.css">
 
@@ -96,7 +97,7 @@
                             <i class="iconfont icon-chukudan"></i>
                             <span>出库管理</span>
                             <i class="iconfont icon-xiangqing2"></i>
-                            <a href="courseList" target="iframe_a"></a>
+                            <a href="inventorySubList" target="iframe_a"></a>
                         </label>
                     </li>
                     <c:if test="${user.uid==1}" var="if1" scope="page">
@@ -148,7 +149,7 @@
         </ul>
     </div>
     <div class="body_right">
-        <iframe src="userList" width="100%" height="100%" name="iframe_a" style="border: 0"></iframe>
+        <iframe src="publicInventorySumList" width="100%" height="100%" name="iframe_a" style="border: 0"></iframe>
     </div>
 </div>
 
