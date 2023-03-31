@@ -114,7 +114,7 @@
                             <i class="iconfont icon-lishidingdan"></i>
                             <span>出库审批</span>
                             <i class="iconfont icon-xiangqing2"></i>
-                            <a href="assnList" target="iframe_a"></a>
+                            <a href="inventoryReviewSubList" target="iframe_a"></a>
                         </label>
                     </li>
                     <li>

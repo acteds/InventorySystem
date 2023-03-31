@@ -194,7 +194,6 @@ public class InventorySubController {
         }
         response.getWriter().print("<script>alert('删除失败');window.location='inventorySubList'</script>");
     }
-    //todo 审核模块未动
     /**
      * 审核模块
      * @param request
@@ -205,9 +204,9 @@ public class InventorySubController {
         LinkedHashMap<String, Object> user= (LinkedHashMap<String, Object>) request.getSession().getAttribute("user");
         int rank=Integer.parseInt((String) user.get("rank"));
         if (rank==1){
-            ms.setSql("SELECT * FROM inventory where status=0 order by review asc limit ?,?");
+            ms.setSql("SELECT * FROM inventory where status!=0 order by review asc limit ?,?");
         }else {
-            ms.setSql("SELECT * FROM inventory where review<10 and status=0 order by review asc limit ?,?");
+            ms.setSql("SELECT * FROM inventory where review<10 and status!=0 order by review asc limit ?,?");
         }
         ms.runPagination(request, "/inventoryReviewSubList", 10);
         String []top=ms.getTop();
@@ -218,35 +217,59 @@ public class InventorySubController {
         return "inventoryReviewSubList";
     }
     @RequestMapping("/inventoryReviewSubReview")
-    public String inventoryReviewSubReview(HttpServletRequest request,String iid){
-        ms.setSql("select * from inventory_review where iid=?").set(Integer.parseInt(iid));
-        /*如果有审核记录则此次请求为修改*/
-        if (ms.runList().size()>0){
-            ms.setSql("select i.*,ir.explanation as explanation2 " +
-                    "from inventory i,inventory_review ir " +
-                    "where i.iid=ir.iid and i.iid=?").set(Integer.parseInt(iid));
-        }else {
-            ms.setSql("select * from inventory where iid=?").set(Integer.parseInt(iid));
-        }
+    public String inventoryReviewSubReview(HttpServletRequest request,int iid){
+        HttpSession session = request.getSession();
+        session.setAttribute("iid",iid);
+        /*---------------------------------查出库数据---------------------------------*/
+        ms.setSql("select * from inventory where iid=? and status!=0").set(iid);
+        LinkedHashMap<String, Object> inventorySub=ms.runList().get(0);
+        String []top2=ms.getTop();
+        top2= Tools.delString(top2,"gid");
+        top2= Tools.delString(top2,"location");
+        top2= Tools.delString(top2,"status");
+        session.setAttribute("top2",top2);
+        session.setAttribute("inventorySub",inventorySub);
 
+        /*---------------------------------查对应入库单库存---------------------------------*/
+        int status = Integer.parseInt(inventorySub.get("status").toString());
+        //留到提交时查询数量用
+        session.setAttribute("status",status);
+        ms.setSql("select * from inventory where iid=? and review>=10 and status=0").set(status);
         LinkedHashMap<String, Object> list=ms.runList().get(0);
         String []top=ms.getTop();
         top= Tools.delString(top,"status");
+        top= Tools.delString(top,"review");
 
-        HttpSession session=request.getSession();
         session.setAttribute("top",top);
         session.setAttribute("list",list);
-        session.setAttribute("iid",iid);
+
+        /*---------------------------------查审核记录---------------------------------*/
+        ms.setSql("select explanation from inventory_review where iid=?").set(iid);
+        /*如果有审核记录则此次请求为修改*/
+        List<LinkedHashMap<String, Object>> list3=ms.runList();
+        if (ms.getSum()>0){
+            session.setAttribute("inventory_review",list3.get(0).get("explanation"));
+        }
         return "inventoryReviewSubReview";
     }
     @RequestMapping("/InventoryReviewSubReview")
-    public void inventoryReviewSubReview(HttpServletRequest request, HttpServletResponse response,String review,String explanation2) throws IOException {
+    public void inventoryReviewSubReview(HttpServletRequest request, HttpServletResponse response,int review,String explanation) throws IOException {
         HttpSession session=request.getSession();
-        int iid=Integer.parseInt((String) session.getAttribute("iid"));
+        int iid= (int) session.getAttribute("iid");
         int uid=Integer.parseInt(((LinkedHashMap<String,Object>) session.getAttribute("user")).get("uid").toString());
         ms.setSql("select * from inventory where review>=10 and iid=?").set(iid);
         if (ms.runList().size()>0){
-            response.getWriter().print("<script>alert('已经审核通过了,无法修改.');window.history.go(-1);</script>");
+            response.getWriter().print("<script>alert('已经审核通过了,无法修改.');window.location.href='inventoryReviewSubList';</script>");
+            return;
+        }
+        int status= (int) session.getAttribute("status");
+        /*校验库存与出库数量*/
+        ms.setSql("select quantity from inventory where iid=? and review>=10 and status=0").set(status);
+        int quantity=Integer.parseInt(ms.runList().get(0).get("quantity").toString());
+        ms.setSql("select quantity from inventory where iid=? and status!=0").set(iid);
+        int subQuantity=Integer.parseInt(ms.runList().get(0).get("quantity").toString());
+        if (subQuantity>quantity){
+            response.getWriter().print("<script>alert('审核失败,出库数量大于库存');window.location.href='inventoryReviewSubList';</script>");
             return;
         }
 
@@ -254,35 +277,61 @@ public class InventorySubController {
         ms.setSql("select * from inventory_review where iid=?").set(iid);
         /*如果有审核记录则此次请求为修改*/
         if (ms.runList().size()>0){
-            ms.setSql("UPDATE inventory_review SET explanation=? where iid=?").set(explanation2).set(iid);
+            ms.setSql("UPDATE inventory_review SET explanation=? where iid=?").set(explanation).set(iid);
         }else {
-            ms.setSql("INSERT INTO inventory_review VALUE(0,?,?,?)").set(iid).set(uid).set(explanation2);
+            ms.setSql("INSERT INTO inventory_review VALUE(0,?,?,?)").set(iid).set(uid).set(explanation);
         }
-        if(ms.run()>0) {
-            ms.setSql("UPDATE inventory SET review=? WHERE iid=?").set(Integer.parseInt(review)).set(iid);
-            if(ms.run()>0) {
-                response.setHeader("refresh", "0;URL=inventoryReviewSubList");
-            } else {
-                response.getWriter().print("<script>alert('修改失败');window.history.go(-1);</script>");
+        if(ms.run()<=0) {
+            response.getWriter().print("<script>alert('审核记录修改失败');window.history.go(-1);</script>");
+            return;
+        }
+
+        ms.setSql("UPDATE inventory SET review=? WHERE iid=?").set(review).set(iid);
+        if(ms.run()<=0) {
+            response.getWriter().print("<script>alert('出库单记录修改失败');window.history.go(-1);</script>");
+            return;
+        }
+        /*审核未通过不修改库存*/
+        if (review>=10){
+            ms.setSql("UPDATE inventory SET quantity=quantity-? WHERE iid=?").set(subQuantity).set(status);
+            if (ms.run()<=0) {
+                response.getWriter().print("<script>alert('入库单记录修改失败');window.history.go(-1);</script>");
+                return;
             }
-        } else {
-            response.getWriter().print("<script>alert('修改失败');window.history.go(-1);</script>");
+            //todo 考虑数量变为0则删除记录,或在查询加where字段屏蔽掉
         }
+        response.setHeader("refresh", "0;URL=inventoryReviewSubList");
     }
     @RequestMapping("/inventoryReviewSubInfo")
     public String inventoryReviewSubInfo(HttpServletRequest request,String iid){
-        ms.setSql("select i.*,ir.explanation as explanation2,ir.uid as uid2 " +
-                "from inventory i,inventory_review ir " +
-                "where i.iid=ir.iid and i.iid=?").set(Integer.parseInt(iid));
+        HttpSession session = request.getSession();
+        session.setAttribute("iid",iid);
+        /*---------------------------------查出库数据---------------------------------*/
+        ms.setSql("select * from inventory where iid=? and status!=0").set(iid);
+        LinkedHashMap<String, Object> inventorySub=ms.runList().get(0);
+        String []top2=ms.getTop();
+        top2= Tools.delString(top2,"gid");
+        top2= Tools.delString(top2,"location");
+        top2= Tools.delString(top2,"status");
+        session.setAttribute("top2",top2);
+        session.setAttribute("inventorySub",inventorySub);
+
+        /*---------------------------------查对应入库单库存---------------------------------*/
+        int status = Integer.parseInt(inventorySub.get("status").toString());
+        //留到提交时查询数量用
+        session.setAttribute("status",status);
+        ms.setSql("select * from inventory where iid=? and review>=10 and status=0").set(status);
         LinkedHashMap<String, Object> list=ms.runList().get(0);
         String []top=ms.getTop();
-        top= Tools.delString(top,"irid");
         top= Tools.delString(top,"status");
+        top= Tools.delString(top,"review");
 
-        HttpSession session=request.getSession();
         session.setAttribute("top",top);
         session.setAttribute("list",list);
-        session.setAttribute("iid",iid);
+
+        /*---------------------------------查审核记录---------------------------------*/
+        ms.setSql("select * from inventory_review where iid=?").set(iid);
+        session.setAttribute("inventory_review",ms.runList().get(0));
         return "inventoryReviewSubInfo";
     }
     @RequestMapping("/InventoryReviewSubInfo")

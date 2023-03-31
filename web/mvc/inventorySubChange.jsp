@@ -55,6 +55,7 @@
                         </tr>
                     </c:if>
                 </c:forEach>
+                <tr><td style=" border-bottom: 1px #182026 solid;" colspan="2"></td></tr>
                 <%--@elvariable id="list2" type="java.util.LinkedHashMap"--%>
                 <tr>
                     <td align="right">出库数量:</td>

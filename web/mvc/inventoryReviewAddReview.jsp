@@ -50,6 +50,7 @@
             </c:if>
             <%--@elvariable id="parameters" type="java.util.LinkedHashMap"--%>
             <c:if test="${st== 'review'}" var="if5" scope="page">
+                <tr><td style=" border-bottom: 1px #182026 solid;" colspan="2"></td></tr>
                 <tr>
                     <td align="right">审核状态:</td>
                     <td>

@@ -16,7 +16,7 @@
 <body>
 <center>
 <div class="message">
-<form name="form1" action="InventoryReviewAddInfo" method="post" onsubmit="return deleteDemo();">
+<form name="form1" action="InventoryReviewAddInfo" method="post" onsubmit="return deleteDemo(${list.get('review').toString()});">
     <table width="317">
         <tr><td colspan="2" class="title">审核结果</td></tr>
         <tr><td width="100" align="right"></td><td width="217"></td>
@@ -106,7 +106,11 @@
         } else return true;
     }
     //确认提示
-    function deleteDemo(name) {
+    function deleteDemo(review) {
+        if (review<10){
+            //没通过,不会隐藏.
+            return true;
+        }
         if (window.confirm('确认消息后此清单会隐藏,是否确认?')) {//alert("确定");
             return true;
         } else {//alert("取消");

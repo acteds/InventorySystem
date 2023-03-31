@@ -55,6 +55,7 @@
                         </tr>
                     </c:if>
                 </c:forEach>
+                <tr><td style=" border-bottom: 1px #182026 solid;" colspan="2"></td></tr>
                 <tr>
                     <td align="right">出库数量:</td>
                     <td><input name="quantity2" type="number" min="0" max="${list.get("quantity")}" value="${list.get("quantity")}"></td>

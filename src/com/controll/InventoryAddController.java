@@ -216,7 +216,6 @@ public class InventoryAddController {
                 "where i.iid=ir.iid and i.iid=?").set(Integer.parseInt(iid));
         LinkedHashMap<String, Object> list=ms.runList().get(0);
         String []top=ms.getTop();
-        top= Tools.delString(top,"irid");
         top= Tools.delString(top,"status");
 
         HttpSession session=request.getSession();
