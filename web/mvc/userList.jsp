@@ -57,10 +57,15 @@
 					<td>${temp.get(key)}</td>
 				</c:if>
 			</c:forEach>
-			<td align="center">
-				<a onClick="return deleteDemo(`${temp.get('name')}`)" href="userDel?${top[0]}=${temp.get(top[0])}" class="fonts4">删除</a>|
-				<a href="userReset?${top[0]}=${temp.get(top[0])}">重置密码</a>|
-				<a href="userChangeRank?${top[0]}=${temp.get(top[0])}">修改权限</a>
+			<td align="center"><%--限制用户管理员修改超管账号--%><%--@elvariable id="Integer" type="java.lang.Integer"--%>
+				<c:if test="${user.rank==1 or (temp.rank!=1 and user.rank==6)}" var="if1" scope="page">
+					<a onClick="return deleteDemo(`${temp.get('name')}`)" href="userDel?${top[0]}=${temp.get(top[0])}" class="fonts4">删除</a>|
+					<a href="userReset?${top[0]}=${temp.get(top[0])}">重置密码</a>|
+					<a href="userChangeRank?${top[0]}=${temp.get(top[0])}">修改权限</a>
+				</c:if>
+				<c:if test="${not if1}">
+					无法变更
+				</c:if>
 			</td>
 		</tr>
 		</c:forEach>

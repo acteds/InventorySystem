@@ -31,10 +31,21 @@
 				<td align="right">${translate.get(st)}:</td>
 				<td><%--@elvariable id="aidkey" type="java.lang.String"--%>
 					<select name="${st}" id="sort" size="1">
-						<%--@elvariable id="parameters" type="java.util.LinkedHashMap"--%>
+					<%--@elvariable id="parameters" type="java.util.LinkedHashMap"--%>
+					<%--限制用户管理员的更改权限范围--%>
+					<%--@elvariable id="user" type="java.util.LinkedHashMap"--%>
+					<c:if test="${user.rank==1}">
 						<c:forEach var="entry" items="${parameters.get('2')}">
 							<option value='${entry.key}'>${entry.value}</option>
 						</c:forEach>
+					</c:if>
+					<c:if test="${user.rank==6}">
+						<c:forEach var="entry" items="${parameters.get('2')}">
+							<c:if test="${entry.key ne 1}">
+								<option value='${entry.key}'>${entry.value}</option>
+							</c:if>
+						</c:forEach>
+					</c:if>
 					</select>
 				</td>
 			</c:if>

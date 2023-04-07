@@ -75,6 +75,13 @@ public class UserController {
     }
     @RequestMapping("/UserInsert")
     public void UserInsert(HttpServletRequest request, HttpServletResponse response,String username) throws IOException {
+        //用户管理员无法赋予超级管理员权限.
+        HttpSession session=request.getSession();
+        int rank=Integer.parseInt(request.getParameter("rank"));
+        if(rank==1 &&Integer.parseInt(((LinkedHashMap<String, Object>) session.getAttribute("user")).get("rank").toString())==6){
+            response.getWriter().print("<script>alert('你无权添加超级管理员权限');window.location='userList'</script>");
+            return;
+        }
         String []top= (String[]) request.getSession().getAttribute("top");
         ms.setSql("select * from user where name=?").set(username);
         if(ms.runList().size()>0) {
@@ -124,7 +131,6 @@ public class UserController {
         //用户修改后的登录名字
         String name=request.getParameter("name");
         //用户原登录名字
-        String name0=user.get("name").toString();
         ms.setSql("SELECT * FROM user where name=? and uid!=?").set(name).set(user.get("uid")).runList();
         //有记录且原名字与新名字不同
         if (ms.getSum()!= 0) {
@@ -153,6 +159,7 @@ public class UserController {
         ms.setSql("SELECT * from user where status=1 order by uid asc limit ?,?");
         ms.runPagination(request, "/userList", 10);
         String [] top=Tools.delString(ms.getTop(),"status");
+        top=Tools.delString(top,"password");
         request.setAttribute("top", top);
         //----------------------------------转发------------------------------------------------------------
         return "userList";
@@ -188,7 +195,12 @@ public class UserController {
     }
     @RequestMapping("/UserChangeRank")
     public void UserChangeRank(HttpServletRequest request, HttpServletResponse response,String rank) throws IOException {
+        //用户管理员无法赋予超级管理员权限.
         HttpSession session=request.getSession();
+        if(Integer.parseInt(rank)==1 &&Integer.parseInt(((LinkedHashMap<String, Object>) session.getAttribute("user")).get("rank").toString())==6){
+            response.getWriter().print("<script>alert('你无权添加超级管理员权限');window.location='userList'</script>");
+            return;
+        }
         // --------------------------------------------修改权限----------------------------------------------------
         ms.setSql("UPDATE user SET `rank`=? WHERE uid=?").set(rank);
         ms.set(Integer.parseInt(session.getAttribute("uid").toString()));
@@ -197,7 +209,7 @@ public class UserController {
         if(ms.run()>0) {
             response.setHeader("refresh", "0;URL=userList");
         } else {
-            response.getWriter().print("<script>alert('修改失败');window.location='userChangeRank'</script>");
+            response.getWriter().print("<script>alert('修改失败');window.location='userList'</script>");
         }
     }
 }

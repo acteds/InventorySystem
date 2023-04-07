@@ -152,7 +152,7 @@ public class ParametersController {
         }else {
             pmid= (String) session.getAttribute("parametersMainID");
         }
-        ms.setSql("SELECT psid,name,value,explanation FROM parameters_sub where pmid=? order by psid asc limit ?,?");
+        ms.setSql("SELECT psid,name,value,explanation FROM parameters_sub where pmid=? order by value asc limit ?,?");
         ms.set(Integer.parseInt(pmid));
         ms.runPagination(request, "/parametersSubList", 10);
         String []top=ms.getTop();

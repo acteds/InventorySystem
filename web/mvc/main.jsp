@@ -1,4 +1,5 @@
 ﻿<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -75,7 +76,7 @@
                     <i class="iconfont icon-xiangqing1"></i>
                     <a href="javascript:;"></a>
                 </label>
-                <ul>
+                <ul><c:if test="${fn:contains([1,2,3,4,5,7],user.rank)}">
                     <li>
                         <label>
                             <i class="iconfont icon-cangkuchaxunguanli"></i>
@@ -83,7 +84,8 @@
                             <i class="iconfont icon-xiangqing2"></i>
                             <a href="publicInventorySumList" target="iframe_a"></a>
                         </label>
-                    </li>
+                    </li></c:if>
+                    <c:if test="${fn:contains([1,2],user.rank)}">
                     <li>
                         <label>
                             <i class="iconfont icon-rukudan"></i>
@@ -91,7 +93,7 @@
                             <i class="iconfont icon-xiangqing2"></i>
                             <a href="inventoryAddList" target="iframe_a"></a>
                         </label>
-                    </li>
+                    </li></c:if><c:if test="${fn:contains([1,3],user.rank)}">
                     <li>
                         <label>
                             <i class="iconfont icon-chukudan"></i>
@@ -99,8 +101,7 @@
                             <i class="iconfont icon-xiangqing2"></i>
                             <a href="inventorySubList" target="iframe_a"></a>
                         </label>
-                    </li>
-                    <c:if test="${user.uid==1}" var="if1" scope="page">
+                    </li></c:if><c:if test="${fn:contains([1,4],user.rank)}">
                     <li>
                         <label>
                             <i class="iconfont icon-lishidingdan"></i>
@@ -108,7 +109,7 @@
                             <i class="iconfont icon-xiangqing2"></i>
                             <a href="inventoryReviewAddList" target="iframe_a"></a>
                         </label>
-                    </li>
+                    </li></c:if><c:if test="${fn:contains([1,5],user.rank)}">
                     <li>
                         <label>
                             <i class="iconfont icon-lishidingdan"></i>
@@ -116,15 +117,15 @@
                             <i class="iconfont icon-xiangqing2"></i>
                             <a href="inventoryReviewSubList" target="iframe_a"></a>
                         </label>
-                    </li>
+                    </li></c:if><c:if test="${fn:contains([1,6],user.rank)}">
                     <li>
                         <label>
                             <i class="iconfont icon-yonghuguanli"></i>
                             <span>账号管理</span>
                             <i class="iconfont icon-xiangqing2"></i>
-                            <a href="userList?t=1" target="iframe_a"></a>
+                            <a href="userList" target="iframe_a"></a>
                         </label>
-                    </li>
+                    </li></c:if><c:if test="${fn:contains([1,7],user.rank)}">
                     <li>
                         <label>
                             <i class="iconfont icon-huopinxinxi"></i>
@@ -132,7 +133,7 @@
                             <i class="iconfont icon-xiangqing2"></i>
                             <a href="goodsList?t=1" target="iframe_a"></a>
                         </label>
-                    </li>
+                    </li></c:if><c:if test="${user.rank==1}">
                     <li>
                         <label>
                             <i class="iconfont icon-peizhi"></i>
@@ -140,16 +141,16 @@
                             <i class="iconfont icon-xiangqing2"></i>
                             <a href="parametersMainList" target="iframe_a"></a>
                         </label>
-                    </li>
-                    </c:if>
-                    <c:if test="${not if1}">
-                    </c:if>
+                    </li></c:if>
                 </ul>
             </li>
         </ul>
     </div>
-    <div class="body_right">
-        <iframe src="publicInventorySumList" width="100%" height="100%" name="iframe_a" style="border: 0"></iframe>
+    <div class="body_right"><c:if test="${fn:contains([1,2,3,4,5,7],user.rank)}">
+        <iframe src="publicInventorySumList" width="100%" height="100%" name="iframe_a" style="border: 0"></iframe></c:if>
+        <c:if test="${user.rank==6}">
+        <iframe src="userList" width="100%" height="100%" name="iframe_a" style="border: 0"></iframe>
+        </c:if>
     </div>
 </div>
 

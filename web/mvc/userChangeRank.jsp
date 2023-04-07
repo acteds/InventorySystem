@@ -22,12 +22,23 @@
 	<c:if test="${st=='rank'}" var="if1" scope="page">
 		<%--@elvariable id="translate" type="java.util.Map"--%>
 		<td align="right">${translate.get(st)}:</td>
-		<td>
+		<td><%--@elvariable id="user" type="java.util.Map"--%>
 			<select name="${st}" id="sort" size="1">
+				<%--限制用户管理员的更改权限范围--%>
+				<c:if test="${user.rank==1}">
 				<c:forEach var="entry" items="${parameters.get('2')}">
 					<option value='${entry.key}' <c:if test="${list.get(0).get(st).toString() == entry.key}"> selected = "selected"</c:if>>
 							${entry.value}</option>
 				</c:forEach>
+				</c:if>
+				<c:if test="${user.rank==6}">
+					<c:forEach var="entry" items="${parameters.get('2')}">
+						<c:if test="${entry.key ne 1}">
+							<option value='${entry.key}' <c:if test="${list.get(0).get(st).toString() == entry.key}"> selected = "selected"</c:if>>
+									${entry.value}</option>
+						</c:if>
+					</c:forEach>
+				</c:if>
 			</select>
 		</td>
 	</c:if>

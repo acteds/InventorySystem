@@ -28,7 +28,7 @@ public class InventoryController {
         ms.runPagination(request, "/publicInventorySumList", 10);
         String []top=ms.getTop();
         request.setAttribute("top", top);
-        return "inventorySumList";
+        return "publicInventorySumList";
     }
     @RequestMapping("/publicInventoryInfo")
     public String publicInventoryInfo(HttpServletRequest request,String gid) {
@@ -44,6 +44,6 @@ public class InventoryController {
         String goodsName=goods.get(gid);
         request.setAttribute("top", top);
         request.setAttribute("goodsName", goodsName);
-        return "inventoryInfo";
+        return "publicInventoryInfo";
     }
 }
