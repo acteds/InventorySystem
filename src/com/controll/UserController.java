@@ -179,7 +179,7 @@ public class UserController {
     public void userReset(HttpServletResponse response, String uid) throws IOException {
         int i=ms.setSql("update user set password=name where uid=?").set(uid).run();
         if(i>0) {
-            response.getWriter().print("<script>alert('已重置密码为账号名');window.location='userList'</script>");
+            response.getWriter().print("<script>alert('已重置密码为用户名');window.location='userList'</script>");
         } else {
             response.getWriter().print("<script>alert('重置密码失败');window.location='userList'</script>");
         }

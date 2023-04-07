@@ -58,7 +58,7 @@
 		</c:forEach>
 		<tr>	<%--@elvariable id="returnUrl" type="String"--%>
 			<td colspan="2" align="center" style="padding-top: 10px">
-				<input name="start" type="submit" value="注册" class="botton">
+				<input name="start" type="submit" value="添加" class="botton">
 				<input name="reset" type="reset" value="重置" class="botton">
 				<a href="userList"><input name="button" type="button" value="返回" class="botton"></a>
 			</td>

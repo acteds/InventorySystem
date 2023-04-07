@@ -105,7 +105,7 @@
                     <li>
                         <label>
                             <i class="iconfont icon-lishidingdan"></i>
-                            <span>入库审批</span>
+                            <span>入库审核</span>
                             <i class="iconfont icon-xiangqing2"></i>
                             <a href="inventoryReviewAddList" target="iframe_a"></a>
                         </label>
@@ -113,7 +113,7 @@
                     <li>
                         <label>
                             <i class="iconfont icon-lishidingdan"></i>
-                            <span>出库审批</span>
+                            <span>出库审核</span>
                             <i class="iconfont icon-xiangqing2"></i>
                             <a href="inventoryReviewSubList" target="iframe_a"></a>
                         </label>
@@ -121,7 +121,7 @@
                     <li>
                         <label>
                             <i class="iconfont icon-yonghuguanli"></i>
-                            <span>账号管理</span>
+                            <span>用户管理</span>
                             <i class="iconfont icon-xiangqing2"></i>
                             <a href="userList" target="iframe_a"></a>
                         </label>
@@ -129,7 +129,7 @@
                     <li>
                         <label>
                             <i class="iconfont icon-huopinxinxi"></i>
-                            <span>货品管理</span>
+                            <span>类别管理</span>
                             <i class="iconfont icon-xiangqing2"></i>
                             <a href="goodsList?t=1" target="iframe_a"></a>
                         </label>

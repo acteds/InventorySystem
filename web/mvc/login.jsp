@@ -78,7 +78,7 @@
                 </tr>
                 <tr>
                     <td colspan="2" align="center" style="padding-top: 10px"><input name="start" type="submit" value="登录" class="botton">
-                        <a href="reg"><input name="button" type="button" value="注册" class="botton"></a></td>
+                        <input name="reset" type="reset" value="重置" class="botton"></td>
                 </tr>
             </table>
         </form>

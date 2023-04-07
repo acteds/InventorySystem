@@ -4,7 +4,7 @@
 <html><%--@elvariable id="top" type="java.lang.String"--%>
 <head><%--@elvariable id="translate" type="java.util.Map"--%>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <title>添加货品</title>
+    <title>添加货品类别</title>
     <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/style.css">
     <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/media.css">
 </head>
@@ -13,7 +13,7 @@
 <div class="message">
 <form name="form1" action="GoodsInsert" method="post" onsubmit="return NotNull();">
     <table width="317">
-        <tr><td colspan="2" class="title">添加货品</td></tr>
+        <tr><td colspan="2" class="title">添加货品类别</td></tr>
         <tr><td width="100" align="right"></td><td width="217"></td>
         </tr>
         <c:forEach var="st" items="${top}">

@@ -56,7 +56,7 @@
 			</td>
 		</tr>
 		</c:forEach>
-		<tr><td colspan="${fn:length(top)+1}" align="center"><a class="fonts1" href="parametersSubInsert">添加参数</a></td></tr>
+		<tr><td colspan="${fn:length(top)+1}" align="center"><a class="fonts1" href="parametersSubInsert">添加键值</a></td></tr>
 	</table>
 </div>
 </center>

@@ -8,7 +8,7 @@
     <%--@elvariable id="username" type="java.lang.String"--%>
 	<%--@elvariable id="parametersMainName" type="java.lang.String"--%>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <title>货品管理</title>
+    <title>货品类别管理</title>
     <link href="${pageContext.request.contextPath}/css/bootstrap.min.css" rel="stylesheet">
     <link href="${pageContext.request.contextPath}/css/List.css" rel="stylesheet">
     <style type="text/css">
@@ -32,7 +32,7 @@
 <body>
 <center>
 <div class="c1"><%--@elvariable id="user" type="java.util.Map"--%>
-	<h2>货品管理</h2><%--@elvariable id="sum" type="int"--%>
+	<h2>货品类别管理</h2><%--@elvariable id="sum" type="int"--%>
 	<table border="1" class="table table-striped table-bordered table-condensed table-hover">
 		<tr><%--@elvariable id="bar" type="java.lang.String"--%>
 			<td colspan="${fn:length(top)}" align="left">当前用户:&nbsp;<span
@@ -56,7 +56,7 @@
 			</td>
 		</tr>
 		</c:forEach>
-		<tr><td colspan="${fn:length(top)+1}" align="center"><a class="fonts1" href="goodsInsert">添加货品</a></td></tr>
+		<tr><td colspan="${fn:length(top)+1}" align="center"><a class="fonts1" href="goodsInsert">添加货品类别</a></td></tr>
 	</table>
 </div>
 </center>

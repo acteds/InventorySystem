@@ -7,7 +7,7 @@
     <%--@elvariable id="top" type="java.lang.String"--%>
     <%--@elvariable id="username" type="java.lang.String"--%>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <title>参数名称管理</title>
+    <title>参数信息管理</title>
     <link href="${pageContext.request.contextPath}/css/bootstrap.min.css" rel="stylesheet">
     <link href="${pageContext.request.contextPath}/css/List.css" rel="stylesheet">
     <style type="text/css">
@@ -31,7 +31,7 @@
 <body>
 <center>
 <div class="c1"><%--@elvariable id="user" type="java.util.Map"--%>
-	<h2>参数名称管理</h2><%--@elvariable id="sum" type="int"--%>
+	<h2>参数信息管理</h2><%--@elvariable id="sum" type="int"--%>
 	<table border="1" class="table table-striped table-bordered table-condensed table-hover">
 		<tr><%--@elvariable id="bar" type="java.lang.String"--%>
 			<td colspan="${fn:length(top)}" align="left">当前用户:&nbsp;<span
@@ -52,11 +52,11 @@
 			<td align="center">
 				<a onClick="return deleteDemo(`${temp.get('name')}`,`${temp.get('ParametersSubCount')}`)" href="ParametersMainDel?${top[0]}=${temp.get(top[0])}" class="fonts4">删除</a>|
 				<a href="parametersMainChange?${top[0]}=${temp.get(top[0])}">修改</a>|
-				<a href="parametersSubList?${top[0]}=${temp.get(top[0])}&name=${temp.get('name')}">查看参数</a>
+				<a href="parametersSubList?${top[0]}=${temp.get(top[0])}&name=${temp.get('name')}">查看参数详情</a>
 			</td>
 		</tr>
 		</c:forEach>
-		<tr><td colspan="${fn:length(top)+1}" align="center"><a class="fonts1" href="parametersMainInsert">添加参数</a></td></tr>
+		<tr><td colspan="${fn:length(top)+1}" align="center"><a class="fonts1" href="parametersMainInsert">添加参数信息</a></td></tr>
 	</table>
 </div>
 </center>
