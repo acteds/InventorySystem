@@ -1,4 +1,4 @@
-package com.controll;
+package com.controller;
 
 import com.aotmd.Tools;
 import com.dao.MySql;

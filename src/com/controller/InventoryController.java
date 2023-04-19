@@ -1,4 +1,4 @@
-package com.controll;
+package com.controller;
 
 import com.aotmd.Tools;
 import com.dao.MySql;
@@ -23,8 +23,9 @@ public class InventoryController {
     }
     @RequestMapping("/publicInventorySumList")
     public String publicInventorySumList(HttpServletRequest request) {
-        ms.setSql("SELECT gid,sum(quantity) as quantity FROM inventory " +
-                "where review>=10 and status=0 GROUP BY gid order by gid asc limit ?,?");
+        ms.setSql("SELECT gid,sum(quantity) as quantity, max(createTime) as lastChangeTime," +
+                "SUBSTRING(group_concat(distinct location),1,47) as mainLocation " +
+                "FROM inventory where review>=10 and status=0 GROUP BY gid order by gid asc limit ?,?");
         ms.runPagination(request, "/publicInventorySumList", 10);
         String []top=ms.getTop();
         request.setAttribute("top", top);

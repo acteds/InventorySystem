@@ -1,8 +1,9 @@
-package com.controll;
+package com.controller;
 
 import com.aotmd.Tools;
 import com.dao.MySql;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.servlet.http.HttpServletRequest;
@@ -169,6 +170,7 @@ public class InventorySubController {
             response.getWriter().print("<script>alert('修改失败');window.history.go(-1);</script>");
         }
     }
+    @Transactional
     @RequestMapping("/inventorySubDel")
     public void inventorySubDel(HttpServletResponse response, int iid) throws IOException {
         //查询审核状态
@@ -252,6 +254,7 @@ public class InventorySubController {
         }
         return "inventoryReviewSubReview";
     }
+    @Transactional
     @RequestMapping("/InventoryReviewSubReview")
     public void inventoryReviewSubReview(HttpServletRequest request, HttpServletResponse response,int review,String explanation) throws IOException {
         HttpSession session=request.getSession();

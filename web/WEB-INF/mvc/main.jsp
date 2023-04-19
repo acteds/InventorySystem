@@ -58,16 +58,6 @@
                             <a href="javaScript:document.getElementsByName('iframe_a')[0].contentWindow.location.reload();"></a>
                         </label>
                     </li>
-                    <c:if test="${user.rank=='学生'}">
-<%--                    <li>--%>
-<%--                        <label>--%>
-<%--                            <i class="iconfont icon-xiangqing"></i>--%>
-<%--                            <span>所在社团信息</span>--%>
-<%--                            <i class="iconfont icon-xiangqing2"></i>--%>
-<%--                            <a href="assnMore" target="iframe_a"></a>--%>
-<%--                        </label>--%>
-<%--                    </li>--%>
-                    </c:if>
                 </ul>
             </li>
             <li>
@@ -80,7 +70,7 @@
                     <li>
                         <label>
                             <i class="iconfont icon-cangkuchaxunguanli"></i>
-                            <span>库存查询</span>
+                            <span>库存总览</span>
                             <i class="iconfont icon-xiangqing2"></i>
                             <a href="publicInventorySumList" target="iframe_a"></a>
                         </label>
@@ -131,7 +121,7 @@
                             <i class="iconfont icon-huopinxinxi"></i>
                             <span>类别管理</span>
                             <i class="iconfont icon-xiangqing2"></i>
-                            <a href="goodsList?t=1" target="iframe_a"></a>
+                            <a href="goodsList" target="iframe_a"></a>
                         </label>
                     </li></c:if><c:if test="${user.rank==1}">
                     <li>

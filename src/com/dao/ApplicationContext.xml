@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:p="http://www.springframework.org/schema/p"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+    <!--springmvc-servlet.xml转移内容-->
+    <context:component-scan base-package="com"/><!--扫描注解,若在servlet-name-servlet.xml里,则只要扫描控制器-->
+<!--    <mvc:interceptors>&lt;!&ndash;全局拦截器&ndash;&gt;-->
+<!--        <bean class="com.aotmd.LoginFilter"/>-->
+<!--    </mvc:interceptors>-->
+    <mvc:interceptors>
+        <mvc:interceptor>
+            <!--mapping:哪些路径需要经过拦截器 /**: 表示n层路径 /*:表示一层路径 -->
+            <mvc:mapping path="/**"/>
+            <!--exclude-mapping:设置不经过该拦截的路径-->
+            <mvc:exclude-mapping path="/img/*"/>
+            <mvc:exclude-mapping path="/css/**"/>
+            <mvc:exclude-mapping path="/js/**"/>
+            <!--bean表示你自定义的拦截器类路径-->
+            <bean class="com.aotmd.LoginFilter"/>
+        </mvc:interceptor>
+        <mvc:interceptor>
+            <!--mapping:哪些路径需要经过拦截器 /**: 表示n层路径 /*:表示一层路径 -->
+            <mvc:mapping path="/**"/>
+            <!--exclude-mapping:设置不经过该拦截的路径-->
+            <mvc:exclude-mapping path="/img/*"/>
+            <mvc:exclude-mapping path="/css/**"/>
+            <mvc:exclude-mapping path="/js/**"/>
+            <!--bean表示你自定义的拦截器类路径-->
+            <bean class="com.aotmd.RankFilter"/>
+        </mvc:interceptor>
+    </mvc:interceptors>
+    <!--配置视图解析器-->
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver" p:prefix="/WEB-INF/mvc/" p:suffix=".jsp"/>
+    <!--开启注解支持,加入validator属性来开启spring的Valid功能-->
+    <mvc:annotation-driven/>
+    <!--允许js,css目录下的所有文件可见,转换实体路径为视图路径,因此拦截器如果为全局依然要放行这些视图-->
+    <mvc:resources mapping="/js/**" location="/js/"/>
+    <mvc:resources mapping="/css/**" location="/css/"/>
+    <mvc:resources mapping="/img/**" location="/img/"/>
+
+    <!--原内容-->
+    <!--<context:component-scan base-package="com.dao"/>-->
+    <!--配置数据源-->
+    <bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource">
+        <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+        <property name="url" value="jdbc:mysql://localhost:3306/inventory_system?characterRncoding=utf-8"/>
+        <property name="username" value="root"/>
+        <property name="password" value="123456"/>
+        <property name="maxTotal" value="30"/><!--最大连接数-->
+        <property name="maxIdle" value="10"/><!--最大空闲连接数-->
+        <property name="initialSize" value="5"/><!--初始化连接数-->
+    </bean>
+    <!--添加事务支持-->
+    <bean id="manager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    <tx:annotation-driven transaction-manager="manager"/><!--开启事务支持-->
+    <!--配置MyBatis 工厂，同时指定数据源，并与MyBatis完美整合-->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <!--configLocation的属性值为MyBatis 的核心配置文件-->
+        <property name="configLocation" value="classpath:com/dao/MybatisConfig.xml"/>
+    </bean>
+    <!--Mapper代理开发，使用Spring自动扫描MyBatis的接口并装配(Spring 将指定包中所有被＠Mapper注解标注的接口自动装配为MyBatis的映射接口）-->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <!--mybatis-spring组件的扫描器，只需要接口（接口方法与SQL映射文件中的相同）-->
+        <property name="basePackage" value="com.dao"/>
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
+    </bean>
+</beans>

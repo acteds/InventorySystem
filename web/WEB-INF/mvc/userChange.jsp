@@ -38,7 +38,7 @@
 		<tr><td colspan="2" align="center" style="padding-top: 10px">
 				<input name="start" type="submit" value="修改" class="botton">
 				<input name="reset" type="reset" value="重置" class="botton">
-				<a href="userList"><input name="button" type="button" value="返回" class="botton"></a>
+				<a href="JavaScript:window.history.go(-1);"><input name="button" type="button" value="返回" class="botton"></a>
 			</td>
 		</tr>
 	</table>

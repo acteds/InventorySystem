@@ -1,5 +1,6 @@
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
@@ -7,7 +8,7 @@
 	<%--@elvariable id="top" type="java.lang.String"--%>
 	<%--@elvariable id="username" type="java.lang.String"--%>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-	<title>库存查询</title>
+	<title>库存总览</title>
 	<link href="${pageContext.request.contextPath}/css/bootstrap.min.css" rel="stylesheet">
 	<link href="${pageContext.request.contextPath}/css/List.css" rel="stylesheet">
 	<style type="text/css">
@@ -31,7 +32,7 @@
 <body>
 <center>
 	<div class="c1"><%--@elvariable id="user" type="java.util.Map"--%>
-		<h2>库存查询</h2><%--@elvariable id="sum" type="int"--%>
+		<h2>库存总览</h2><%--@elvariable id="sum" type="int"--%>
 		<table border="1" class="table table-striped table-bordered table-condensed table-hover">
 			<tr><%--@elvariable id="bar" type="java.lang.String"--%>
 				<td colspan="${fn:length(top)}" align="left">当前用户:&nbsp;<span
@@ -55,7 +56,10 @@
 						<c:if test="${key=='gid'}" var="if1" scope="page">
 							<td>${goodsMap.get(temp.get(key).toString())}</td>
 						</c:if>
-						<c:if test="${not if1}">
+						<c:if test="${key=='lastChangeTime'}" var="if2" scope="page"><%--@elvariable id="parameters" type="java.util.LinkedHashMap"--%>
+							<td><fmt:formatDate pattern="yyyy-MM-dd HH:mm:ss" value="${temp.get(key)}"/></td>
+						</c:if>
+						<c:if test="${not if1 and not if2}">
 							<td>${temp.get(key)}</td>
 						</c:if>
 					</c:forEach>

@@ -30,6 +30,9 @@ public class Translate {
 		map.put("location","位置");
 		map.put("createTime","创建时间");
 		map.put("review","审核状态");
+
+		map.put("lastChangeTime","最后修改时间");
+		map.put("mainLocation","主要位置");
 		return map;
 	}
 

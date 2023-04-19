@@ -9,7 +9,7 @@ html {
 }
 body{
     opacity: 0;
-    animation: page-fade-in 0.1s forwards;
+    animation: page-fade-in 0.5s forwards;
 }
 @keyframes page-fade-in {
     0% {
