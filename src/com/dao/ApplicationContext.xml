@@ -45,7 +45,7 @@
     <!--配置数据源-->
     <bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource">
         <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
-        <property name="url" value="jdbc:mysql://localhost:3306/inventory_system?characterRncoding=utf-8"/>
+        <property name="url" value="jdbc:mysql://localhost:3306/inventory_system?characterEncoding=utf-8"/>
         <property name="username" value="root"/>
         <property name="password" value="123456"/>
         <property name="maxTotal" value="30"/><!--最大连接数-->

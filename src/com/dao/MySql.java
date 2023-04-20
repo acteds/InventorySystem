@@ -82,7 +82,7 @@ public class MySql {
 	private void login() {
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
-			String url = "jdbc:mysql://localhost:3306/inventory_system?useUnicode=true&characterRncoding=utf-8";
+			String url = "jdbc:mysql://localhost:3306/inventory_system?useUnicode=true&characterEncoding=utf-8";
 			conn = DriverManager.getConnection(url, "root", "123456");
 		} catch (ClassNotFoundException | SQLException e) {
 			e.printStackTrace();
@@ -185,7 +185,7 @@ public class MySql {
 				// 初始化
 				top = new String[cols];
 				for (int i = 0; i < cols; i++) {
-					// 获取列名存入Sring[]
+					// 获取列名存入String[]
 					top[i] = rsmd.getColumnName(i + 1);
 				}
 			}

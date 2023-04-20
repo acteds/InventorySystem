@@ -1,4 +1,5 @@
 @import "bg.css";
+@import "scrollbar.css";
 .main{
   margin-top: 100px;
   width:960px;

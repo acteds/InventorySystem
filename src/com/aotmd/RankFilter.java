@@ -17,7 +17,10 @@ import java.util.Map;
 @Order(2)
 public class RankFilter implements HandlerInterceptor {
     private Map<String, int[]> rankMap;
+    /**全局排除拦截的网址*/
     private Map<String, String> excludeURLs;
+    /**用户权限排除拦截的网址*/
+    private Map<String, int[]> userExcludeURLs;
     private void init(){
         /*权限控制*/
         rankMap=new HashMap<>();
@@ -30,16 +33,22 @@ public class RankFilter implements HandlerInterceptor {
         rankMap.put("/goods",new int[]{1,7});
         rankMap.put("/parameters",new int[]{1});
 
-        /*排除拦截的网址*/
+        /*全局排除拦截的网址*/
         String[] excludeURLs = { "/UserChange", "/userChange"};
         this.excludeURLs =new HashMap<>();
         for (String s : excludeURLs) {
             this.excludeURLs.put(s, s);
         }
+        /*用户权限排除拦截的网址*/
+        this.userExcludeURLs =new HashMap<>();
+        this.userExcludeURLs.put("/inventoryReviewAddInfo",new int[]{2,3});
+        this.userExcludeURLs.put("/InventoryReviewAddInfo",new int[]{2,3});
+
     }
     public RankFilter() {
         init();
     }
+
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         /*URL网址*/
@@ -48,24 +57,43 @@ public class RankFilter implements HandlerInterceptor {
         String ctxPath = request.getContextPath();
         /*实际控制器Url*/
         String controllerUri = requestUri.substring(ctxPath.length());
-        /*排除拦截的网址*/
+        String queryString = request.getQueryString();
+        if (queryString != null) {
+            controllerUri = controllerUri.replace("?" + queryString, "");
+        }
+        /*全局排除拦截的网址*/
         if (excludeURLs.get(controllerUri)!=null) {
             System.out.print("R网址排除 ");
             return true;
         }
-        for (String s : rankMap.keySet()) {
-            if (controllerUri.toLowerCase().contains(s.toLowerCase())) {
-                int[] arr=rankMap.get(s);
-                int rank= Integer.parseInt(((LinkedHashMap<String, Object>) request.getSession().getAttribute("user")).get("rank").toString());
-                for (int value : arr) {
-                    if (value == rank) {
-                        System.out.print("R已授权 ");
+
+
+        if (request.getSession().getAttribute("user")!=null){
+            /*用户权限排除拦截的网址*/
+            int rank= Integer.parseInt(((LinkedHashMap<String, Object>) request.getSession().getAttribute("user")).get("rank").toString());
+            if (userExcludeURLs.get(controllerUri)!=null) {
+                for (int i : userExcludeURLs.get(controllerUri)) {
+                    if (i==rank) {
+                        System.out.print("R用户权限网址排除 ");
                         return true;
                     }
                 }
-                response.getWriter().print("<script>alert('未授权,权限不足!');window.location='main'</script>");
-                System.out.print("R未授权 ");
-                return false;
+            }
+
+            /*权限控制*/
+            for (String s : rankMap.keySet()) {
+                if (controllerUri.toLowerCase().contains(s.toLowerCase())) {
+                    int[] arr=rankMap.get(s);
+                    for (int value : arr) {
+                        if (value == rank) {
+                            System.out.print("R已授权 ");
+                            return true;
+                        }
+                    }
+                    System.out.print("R未授权 ");
+                    response.getWriter().print("<script>alert('未授权,权限不足!');window.history.go(-1);</script>");
+                    return false;
+                }
             }
         }
         return true;

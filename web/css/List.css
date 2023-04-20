@@ -1,4 +1,5 @@
 @import "bg.css";
+@import "scrollbar.css";
 table {
 	margin-top: 10px;
 	font-size: 12px;

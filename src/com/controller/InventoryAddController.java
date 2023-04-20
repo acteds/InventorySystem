@@ -105,6 +105,7 @@ public class InventoryAddController {
         ms.setSql("UPDATE inventory SET gid=?,quantity=?,location=?,explanation=?,review=0 WHERE iid=? and status=0");
         String[]top=(String[]) session.getAttribute("top");
         top= Tools.delString(top,"createTime");
+        top= Tools.delString(top,"iid");
         for (String string : top) {
             ms.set(request.getParameter(string));
         }
