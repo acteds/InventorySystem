@@ -48,7 +48,11 @@ public class UserController {
         return "login";
     }
     @RequestMapping("/Login")
-    public String login(HttpServletRequest request, HttpServletResponse response, String username, String password) throws IOException {
+    public String login(HttpServletRequest request, HttpServletResponse response, String username, String password,String verifyInput) throws IOException {
+        if (!request.getSession().getAttribute("verifyCode").toString().equals(verifyInput)){
+            response.getWriter().print("<script>alert('登录失败,验证码错误');window.location='login'</script>");
+            return null;
+        }
         ms.setSql("select * from user where name=? and password=? and status=1").set(username).set(password);
         List<LinkedHashMap<String, Object>> list =ms.runList();
         if (list.size()==0){

@@ -1,5 +1,6 @@
 package com.aotmd;
 
+
 import org.springframework.core.annotation.Order;
 import org.springframework.web.servlet.HandlerInterceptor;
 
@@ -25,12 +26,11 @@ public class LoginFilter implements HandlerInterceptor {
 			this.excludeExtensions.put(s, s);
 		}
 		/*排除拦截的网址*/
-		String[] excludeURLs = { "/login", "/Login", "/reg", "/Reg"};
+		String[] excludeURLs = { "/login", "/Login","/getVerifyCode"};
 		this.excludeURLs =new HashMap<>();
 		for (String s : excludeURLs) {
 			this.excludeURLs.put(s, s);
 		}
-
 	}
 	public LoginFilter() {
 		init();
@@ -49,13 +49,12 @@ public class LoginFilter implements HandlerInterceptor {
 		String requestUri = request.getRequestURI();
 		/*项目名称*/
 		String ctxPath = request.getContextPath();
-
 		/*设置网址取不到点号时的默认值*/
 		int uriLast = requestUri.lastIndexOf(".");
 		if (uriLast!=-1) {
 			String extensionNameUri = requestUri.substring(uriLast).toLowerCase();
 			if (excludeExtensions.get(extensionNameUri)!=null) {
-				System.out.print("扩展名排除 ");
+				System.out.print("L扩展名排除 ");
 				return true;
 			}
 		}
@@ -64,15 +63,20 @@ public class LoginFilter implements HandlerInterceptor {
 		response.setContentType("text/html;charset=UTF-8");
 		/*实际控制器Url*/
 		String controllerUri = requestUri.substring(ctxPath.length());
+		String queryString = request.getQueryString();
+		if (queryString != null) {
+			controllerUri = controllerUri.replace("?" + queryString, "");
+		}
 		if (excludeURLs.get(controllerUri)!=null) {
-			System.out.print("网址排除 ");
+			System.out.print("L网址排除 ");
 			return true;
 		}
 
 		if (request.getSession().getAttribute("user") != null) {
-			System.out.print("用户排除 ");
+			System.out.print("L已登录排除 ");
 			return true;
 		} else {
+			System.out.print("L未登录 ");
 			response.getWriter().print("<script>alert('你没有登录!');window.location='"+ctxPath+"/'</script>");
 			return false;
 		}

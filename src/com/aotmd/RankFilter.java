@@ -34,7 +34,7 @@ public class RankFilter implements HandlerInterceptor {
         rankMap.put("/parameters",new int[]{1});
 
         /*全局排除拦截的网址*/
-        String[] excludeURLs = { "/UserChange", "/userChange"};
+        String[] excludeURLs = { "/UserChange", "/userChange","/getVerifyCode","/login", "/Login"};
         this.excludeURLs =new HashMap<>();
         for (String s : excludeURLs) {
             this.excludeURLs.put(s, s);
@@ -96,6 +96,7 @@ public class RankFilter implements HandlerInterceptor {
                 }
             }
         }
+        System.out.print("R未捕获:"+controllerUri+" \t");
         return true;
     }
 }
