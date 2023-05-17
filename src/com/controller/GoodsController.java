@@ -61,7 +61,7 @@ public class GoodsController {
         // ---------------------------------------查重-----------------------------
         ms.setSql("SELECT * FROM goods where name=?").set(name);
         if(ms.runList().size()>0) {
-            response.getWriter().print("<script>alert('添加货品失败,名称重复，请重新输入');window.history.go(-1);</script>");
+            response.getWriter().print("<script>alert('添加货品类别失败,名称重复，请重新输入');window.history.go(-1);</script>");
             return;
         }
         String []top= (String[]) request.getSession().getAttribute("top");
@@ -75,7 +75,7 @@ public class GoodsController {
             application.setAttribute("goods",GoodsController.initializationGoods(ms));
             response.setHeader("refresh", "0;URL=goodsList");
         } else {
-            response.getWriter().print("<script>alert('添加货品失败');window.location='goodsList'</script>");
+            response.getWriter().print("<script>alert('添加货品类别失败');window.location='goodsList'</script>");
         }
     }
     @RequestMapping("/goodsChange")
@@ -124,7 +124,7 @@ public class GoodsController {
         }
         ms.setSql("select * from inventory where gid=?").set(Integer.parseInt(gid));
         if (ms.runList().size()>0){
-            response.getWriter().print("<script>alert('删除失败,仓库已存在货品');window.location='goodsList'</script>");
+            response.getWriter().print("<script>alert('删除失败,该货品类别已经被使用');window.location='goodsList'</script>");
             return;
         }
         //----------------------------------------删除-------------------------------------------------------------------

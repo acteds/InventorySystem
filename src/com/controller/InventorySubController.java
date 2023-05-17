@@ -101,7 +101,6 @@ public class InventorySubController {
             response.getWriter().print("<script>alert('添加失败,超过最大值');window.history.go(-1);</script>");
             return;
         }
-        //todo 考虑添加限制:若当前正在审核的出库加上本次的数量大于最大值,则拦截这次添加.
 
         ms.setSql("insert into inventory(gid, uid, quantity, location, explanation, status, createTime) value(?,?,?,?,?,?,?)");
         ms.set(gid).set(uid).set(quantity2).set(location).set(explanation2).set(iid);

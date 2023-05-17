@@ -70,7 +70,7 @@ public class ParametersController {
         String []top= (String[]) request.getSession().getAttribute("top");
         ms.setSql("select * from parameters_main where name=?").set(name);
         if(ms.runList().size()>0) {
-            response.getWriter().print("<script>alert('添加参数失败,名称重复');window.location='parametersMainList'</script>");
+            response.getWriter().print("<script>alert('添加参数名称失败,名称重复');window.location='parametersMainList'</script>");
             return;
         }
         ms.setSql("insert into parameters_main value(0,?,?)");
@@ -81,7 +81,7 @@ public class ParametersController {
         if(ms.run()>0) {
             response.setHeader("refresh", "0;URL=parametersMainList");
         } else {
-            response.getWriter().print("<script>alert('添加参数失败');window.location='parametersMainList'</script>");
+            response.getWriter().print("<script>alert('添加参数名称失败');window.location='parametersMainList'</script>");
         }
     }
     @RequestMapping("/parametersMainChange")
@@ -178,7 +178,7 @@ public class ParametersController {
         String []top= (String[]) request.getSession().getAttribute("top");
         ms.setSql("SELECT * FROM parameters_sub where pmid=? and( name=? or value=?)").set(pmid).set(name).set(value);
         if(ms.runList().size()>0) {
-            response.getWriter().print("<script>alert('添加参数失败,名称或值重复，请重新输入');window.history.go(-1);</script>");
+            response.getWriter().print("<script>alert('添加键值失败,名称或值重复，请重新输入');window.history.go(-1);</script>");
             return;
         }
 
@@ -216,7 +216,7 @@ public class ParametersController {
         ms.runList();
         //有记录
         if (ms.getSum()!= 0) {
-            response.getWriter().print("<script>alert('名称或值已存在，请重新输入');window.history.go(-1);</script>");
+            response.getWriter().print("<script>alert('修改键值失败，名称或值已存在，请重新输入');window.history.go(-1);</script>");
             return;
         }
         // --------------------------------------------修改----------------------------------------------------
@@ -234,7 +234,7 @@ public class ParametersController {
             application.setAttribute("parameters",ParametersController.initializationParameters(ms));
             response.setHeader("refresh", "0;URL=parametersSubList");
         } else {
-            response.getWriter().print("<script>alert('修改失败');window.history.go(-1);</script>");
+            response.getWriter().print("<script>alert('修改键值失败');window.history.go(-1);</script>");
         }
     }
     @RequestMapping("/ParametersSubDel")

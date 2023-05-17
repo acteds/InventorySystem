@@ -56,7 +56,7 @@
 			</td>
 		</tr>
 		</c:forEach>
-		<tr><td colspan="${fn:length(top)+1}" align="center"><a class="fonts1" href="parametersMainInsert">添加参数信息</a></td></tr>
+		<tr><td colspan="${fn:length(top)+1}" align="center"><a class="fonts1" href="parametersMainInsert">添加参数名称</a></td></tr>
 	</table>
 </div>
 </center>
@@ -64,7 +64,7 @@
     //删除提示
     function deleteDemo(name,size) {
 		if (size > 0) {
-			alert('该名称存在参数,请先删除参数');
+			alert('该参数名称下存在参数,请先删除参数');
 			return false;
 		}
         if (window.confirm('你确定要删除' + name + '吗？')) {//alert("确定");

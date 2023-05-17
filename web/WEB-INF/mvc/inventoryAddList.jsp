@@ -91,7 +91,7 @@
 					</td>
 				</tr>
 			</c:forEach>
-			<tr><td colspan="${fn:length(top)+1}" align="center"><a class="fonts1" href="inventoryAddInsert">添加货品入库单</a></td></tr>
+			<tr><td colspan="${fn:length(top)+1}" align="center"><a class="fonts1" href="inventoryAddInsert">添加货品入库清单</a></td></tr>
 		</table>
 	</div>
 </center>

@@ -4,7 +4,7 @@
 <html><%--@elvariable id="top" type="java.lang.String"--%>
 <head><%--@elvariable id="translate" type="java.util.Map"--%>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <title>添加货品入库单</title>
+    <title>添加货品入库清单</title>
     <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/style.css">
     <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/media.css">
 </head>
@@ -13,7 +13,7 @@
 <div class="message">
 <form name="form1" action="InventoryAddInsert" method="post" onsubmit="return NotNull();">
     <table width="317">
-        <tr><td colspan="2" class="title">添加货品入库单</td></tr>
+        <tr><td colspan="2" class="title">添加货品入库清单</td></tr>
         <tr><td width="100" align="right"></td><td width="217"></td>
         </tr>
         <c:forEach var="st" items="${top}">
@@ -24,9 +24,10 @@
                 </tr>
             </c:if>
             <c:if test="${st=='gid'}" var="if2" scope="page">
+                <tr>
                 <%--@elvariable id="translate" type="java.util.Map"--%>
                 <%--@elvariable id="goodsMap" type="java.util.Map"--%>
-                <td align="right">${translate.get(st)}:</td>
+                <td align="right">货品名称:</td>
                 <td>
                     <select name="${st}" id="sort" size="1">
                         <c:forEach var="entry" items="${goodsMap}">
@@ -34,8 +35,17 @@
                         </c:forEach>
                     </select>
                 </td>
+                </tr>
             </c:if>
-            <c:if test="${not if1 and not if2}">
+            <c:if test="${st=='quantity'}" var="if3" scope="page">
+                <%--@elvariable id="translate" type="java.util.Map"--%>
+                <%--@elvariable id="goodsMap" type="java.util.Map"--%>
+                <tr>
+                <td align="right">${translate.get(st)}:</td>
+                <td><input name="${st}" type="number" min="0"></td>
+                </tr>
+            </c:if>
+            <c:if test="${not if1 and not if2 and not if3}">
                 <tr>
                     <td align="right">${translate.get(st)}:</td>
                     <td><input name="${st}" type="text" style="width: 167px;" value=""></td>

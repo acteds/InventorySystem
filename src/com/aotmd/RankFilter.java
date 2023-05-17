@@ -24,7 +24,7 @@ public class RankFilter implements HandlerInterceptor {
     private void init(){
         /*权限控制*/
         rankMap=new HashMap<>();
-        rankMap.put("/publicInventory",new int[]{1,2,3,4,5,6,7});
+        rankMap.put("/publicInventory",new int[]{1,2,3,4,5,7});
         rankMap.put("/inventoryAdd",new int[]{1,2});
         rankMap.put("/inventorySub",new int[]{1,3});
         rankMap.put("/inventoryReviewAdd",new int[]{1,4});
@@ -41,8 +41,10 @@ public class RankFilter implements HandlerInterceptor {
         }
         /*用户权限排除拦截的网址*/
         this.userExcludeURLs =new HashMap<>();
-        this.userExcludeURLs.put("/inventoryReviewAddInfo",new int[]{2,3});
-        this.userExcludeURLs.put("/InventoryReviewAddInfo",new int[]{2,3});
+        this.userExcludeURLs.put("/inventoryReviewAddInfo",new int[]{2});
+        this.userExcludeURLs.put("/InventoryReviewAddInfo",new int[]{2});
+        this.userExcludeURLs.put("/inventoryReviewSubInfo",new int[]{3});
+        this.userExcludeURLs.put("/InventoryReviewSubInfo",new int[]{3});
 
     }
     public RankFilter() {
