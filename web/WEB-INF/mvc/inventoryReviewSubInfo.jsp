@@ -125,7 +125,7 @@
                     <td colspan="2" align="center" style="padding-top: 10px">
                         <input name="start" type="submit" value="确认消息" class="botton">
                         <input name="reset" type="reset" value="重置" class="botton">
-                        <a href="inventoryReviewSubList"><input name="button" type="button" value="返回" class="botton"></a>
+                        <a href="inventorySubList"><input name="button" type="button" value="返回" class="botton"></a>
                     </td>
                 </tr>
             </table>

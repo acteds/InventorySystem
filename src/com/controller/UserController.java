@@ -124,10 +124,10 @@ public class UserController {
         LinkedHashMap<String, Object> user=(LinkedHashMap<String,Object>)session.getAttribute("user");
         //----------------------------------------旧密码正确-------------------------------------------
         //用户登录时记录的密码
-        String password0=user.get("password").toString();
+        String password=user.get("password").toString();
         //用户表单提交的旧密码
-        String password=request.getParameter("password0");
-        if(!(password0.equals(password))) {
+        String password0=request.getParameter("password0");
+        if(!(password.equals(password0))) {
             response.getWriter().print("<script>alert('原密码错误');window.location='userChange'</script>");
             return;
         }
