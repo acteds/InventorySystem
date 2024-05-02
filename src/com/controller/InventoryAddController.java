@@ -22,7 +22,7 @@ import java.util.LinkedHashMap;
  */
 @Controller
 public class InventoryAddController {
-    private MySql ms;
+    private final MySql ms;
 
     public InventoryAddController(MySql ms) {
         this.ms = ms;
@@ -95,7 +95,7 @@ public class InventoryAddController {
     public void InventoryAddChange(HttpServletRequest request, HttpServletResponse response,String iid) throws IOException {
         HttpSession session=request.getSession();
         ms.setSql("select * from inventory where review>=10 and iid=? and status=0").set(Integer.parseInt(iid));
-        if (ms.runList().size()>0){
+        if (!ms.runList().isEmpty()){
             response.getWriter().print("<script>alert('已经审核通过了,无法修改.');window.history.go(-1);</script>");
             return;
         }
@@ -140,8 +140,6 @@ public class InventoryAddController {
 
     /**
      * 审核模块
-     * @param request
-     * @return
      */
     @RequestMapping("/inventoryReviewAddList")
     public String inventoryReviewAddList(HttpServletRequest request) {
@@ -164,7 +162,7 @@ public class InventoryAddController {
     public String inventoryReviewAddReview(HttpServletRequest request,String iid){
         ms.setSql("select * from inventory_review where iid=?").set(Integer.parseInt(iid));
         /*如果有审核记录则此次请求为修改*/
-        if (ms.runList().size()>0){
+        if (!ms.runList().isEmpty()){
             ms.setSql("select i.*,ir.explanation as explanation2 " +
                     "from inventory i,inventory_review ir " +
                     "where i.iid=ir.iid and i.iid=?").set(Integer.parseInt(iid));
@@ -189,7 +187,7 @@ public class InventoryAddController {
         int iid=Integer.parseInt((String) session.getAttribute("iid"));
         int uid=Integer.parseInt(((LinkedHashMap<String,Object>) session.getAttribute("user")).get("uid").toString());
         ms.setSql("select * from inventory where review>=10 and iid=?").set(iid);
-        if (ms.runList().size()>0){
+        if (!ms.runList().isEmpty()){
             response.getWriter().print("<script>alert('已经审核通过了,无法修改.');window.history.go(-1);</script>");
             return;
         }
@@ -197,7 +195,7 @@ public class InventoryAddController {
         // --------------------------------------------修改----------------------------------------------------
         ms.setSql("select * from inventory_review where iid=?").set(iid);
         /*如果有审核记录则此次请求为修改*/
-        if (ms.runList().size()>0){
+        if (!ms.runList().isEmpty()){
             ms.setSql("UPDATE inventory_review SET explanation=? where iid=?").set(explanation2).set(iid);
         }else {
             ms.setSql("INSERT INTO inventory_review VALUE(0,?,?,?)").set(iid).set(uid).set(explanation2);

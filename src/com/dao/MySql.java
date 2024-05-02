@@ -40,11 +40,8 @@ public class MySql {
 
 	public MySql(MySqlDao mySqlDao) {
 		this.mySqlDao = mySqlDao;
-		login();
+		connectToTheDatabase();
 	}
-    public Boolean checkConnections() throws SQLException {
-	    return conn.isClosed();
-    }
 //	/**
 //	 * 默认构造方法
 //	 */
@@ -59,8 +56,8 @@ public class MySql {
 		index=1;
 		try {
 		    //检查连接存活状态
-            if (checkConnections()){
-                login();
+            if (conn.isClosed()){
+                connectToTheDatabase();
             }
 			ps = conn.prepareStatement(sql);
 		} catch (SQLException e) {
@@ -79,7 +76,7 @@ public class MySql {
 	 *	 连接数据库
 	 *
 	 */
-	private void login() {
+	private void connectToTheDatabase() {
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
 			String url = "jdbc:mysql://localhost:3306/inventory_system?useUnicode=true&characterEncoding=utf-8";
@@ -115,8 +112,7 @@ public class MySql {
         	sql=temp.substring(temp.indexOf(": ")+2);
         	if (sql.contains("?")){
 				System.out.println("sql语句错误!有多余的?号");
-        		i=0;
-			}
+            }
 			String type=sql.trim().split("\\s+")[0];
         	if (type.equalsIgnoreCase("update")){
         		i=mySqlDao.update(sql);
@@ -126,9 +122,7 @@ public class MySql {
 				i=mySqlDao.delete(sql);
 			}else {
 				System.out.println("不是增删改的数据库语句");
-				i=0;
-			}
-        	index=1;
+            }
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -173,7 +167,7 @@ public class MySql {
 			}
 			sum=list.size();
 			//当MyBatis取得到值时获取数据库列字段,取不到时使用JDBC取数据库列字段
-			if (list.size()!=0){
+			if (!list.isEmpty()){
 				top=list.get(0).keySet().toArray(new String[0]);
 			} else {
 				System.out.println("调用JDBC获取字段");
@@ -193,7 +187,6 @@ public class MySql {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		index=1;
 		return list;
 	}
 	/**
@@ -203,7 +196,6 @@ public class MySql {
 	 * @param url 当前Servlet网址
 	 * @param pageMax 以多少记录为一页
 	 */
-	@SuppressWarnings("StringConcatenationInsideStringBufferAppend")
 	public void runPagination(HttpServletRequest request, String url, int pageMax) {
 		//当前页
 		int currentPage = 1;
@@ -228,15 +220,14 @@ public class MySql {
 		// 构建分页条
 		for (int i = 1; i <= pages; i++) {
 			if (i == currentPage) {
-				sb.append("<b>" + i + "</b>");
+				sb.append(String.format("<b>%d</b>", i));
 			} else {
-				sb.append("<a href='"+url+"?currentPage=" + i + "'>" + i + "</a>");
+				sb.append(String.format("<a href='%s?currentPage=%d'>%d</a>", url, i, i));
 			}
 			if (i != pages) {
 				sb.append("　");
 			}
 		}
-		index=1;
 		request.getSession().setAttribute("bar", sb.toString());
 	}
 	/**

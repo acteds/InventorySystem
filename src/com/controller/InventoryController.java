@@ -16,7 +16,7 @@ import java.util.LinkedHashMap;
  */
 @Controller
 public class InventoryController {
-    private MySql ms;
+    private final MySql ms;
 
     public InventoryController(MySql ms) {
         this.ms = ms;

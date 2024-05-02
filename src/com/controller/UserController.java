@@ -1,9 +1,9 @@
 package com.controller;
 
 import com.aotmd.Tools;
-import com.aotmd.Translate;
 import com.dao.MySql;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.servlet.ServletContext;
@@ -22,40 +22,26 @@ import java.util.List;
 @Controller
 public class UserController {
     /**数据库操作类*/
-    private MySql ms;
+    private final MySql ms;
     public UserController(MySql ms) {this.ms = ms;}
-    public static LinkedHashMap<String, String> initializationUser(MySql mySql){
-        mySql.setSql("select uid,name from user");
-        List<LinkedHashMap<String, Object>> list = mySql.runList();
-        LinkedHashMap<String, String> map = new LinkedHashMap<>();
-        for (LinkedHashMap<String, Object> temp : list) {
-            map.put(temp.get("uid").toString(), temp.get("name").toString());
-        }
-        return map;
-    }
+
     @RequestMapping("/main")
     public String main(){
         return "main";
     }
     @RequestMapping("/login")
-    public String login(HttpServletRequest request){
-        ServletContext application= request.getSession().getServletContext();
-        //设置翻译图,参数图,货品图,用户图
-        application.setAttribute("translate", Translate.getTranslate());
-        application.setAttribute("parameters",ParametersController.initializationParameters(ms));
-        application.setAttribute("goodsMap",GoodsController.initializationGoods(ms));
-        application.setAttribute("userMap",UserController.initializationUser(ms));
+    public String login(){
         return "login";
     }
     @RequestMapping("/Login")
-    public String login(HttpServletRequest request, HttpServletResponse response, String username, String password,String verifyInput) throws IOException {
+    public String login(HttpServletRequest request, HttpServletResponse response, String username, String password, String verifyInput) throws IOException {
         if (!request.getSession().getAttribute("verifyCode").toString().equals(verifyInput)){
             response.getWriter().print("<script>alert('登录失败,验证码错误');window.location='login'</script>");
             return null;
         }
         ms.setSql("select * from user where name=? and password=? and status=1").set(username).set(password);
         List<LinkedHashMap<String, Object>> list =ms.runList();
-        if (list.size()==0){
+        if (list.isEmpty()){
             response.getWriter().print("<script>alert('登录失败');window.location='login'</script>");
             return null;
         }else {
@@ -77,8 +63,9 @@ public class UserController {
         request.getSession().setAttribute("top",top);
         return "userInsert";
     }
+    @Transactional
     @RequestMapping("/UserInsert")
-    public void UserInsert(HttpServletRequest request, HttpServletResponse response,String username) throws IOException {
+    public void UserInsert(HttpServletRequest request, HttpServletResponse response, String username) throws IOException {
         //用户管理员无法赋予超级管理员权限.
         HttpSession session=request.getSession();
         int rank=Integer.parseInt(request.getParameter("rank"));
@@ -88,7 +75,7 @@ public class UserController {
         }
         String []top= (String[]) request.getSession().getAttribute("top");
         ms.setSql("select * from user where name=?").set(username);
-        if(ms.runList().size()>0) {
+        if(!ms.runList().isEmpty()) {
             response.getWriter().print("<script>alert('添加用户失败,名称重复');window.location='userInsert'</script>");
             return;
         }
@@ -99,7 +86,7 @@ public class UserController {
         }
         if(ms.run()>0) {
             ServletContext application= request.getSession().getServletContext();
-            application.setAttribute("userMap",UserController.initializationUser(ms));
+            application.setAttribute("userMap", InitController.initializationUser(ms));
             response.setHeader("refresh", "0;URL=userList");
         } else {
             response.getWriter().print("<script>alert('添加用户失败');window.location='userInsert'</script>");
@@ -117,6 +104,7 @@ public class UserController {
         request.getSession().setAttribute("top",top);
         return "userChange";
     }
+    @Transactional
     @RequestMapping("/UserChange")
     public void userChange(HttpServletRequest request, HttpServletResponse response) throws IOException {
         HttpSession session=request.getSession();
@@ -151,7 +139,7 @@ public class UserController {
         ms.set(Integer.parseInt(user.get("uid").toString()));
         if(ms.run()>0) {
             ServletContext application= request.getSession().getServletContext();
-            application.setAttribute("userMap",UserController.initializationUser(ms));
+            application.setAttribute("userMap", InitController.initializationUser(ms));
             response.setHeader("refresh", "0;URL=Logout");
         } else {
             response.getWriter().print("<script>alert('修改失败');window.location='userChange'</script>");
@@ -168,12 +156,13 @@ public class UserController {
         //----------------------------------转发------------------------------------------------------------
         return "userList";
     }
+    @Transactional
     @RequestMapping("/userDel")
     public void userDel(HttpServletRequest request,HttpServletResponse response, String uid) throws IOException {
         int i=ms.setSql("update user set status=0 where uid=?").set(uid).run();
         if(i>0) {
             ServletContext application= request.getSession().getServletContext();
-            application.setAttribute("userMap",UserController.initializationUser(ms));
+            application.setAttribute("userMap", InitController.initializationUser(ms));
             response.getWriter().print("<script>alert('已删除');window.location='userList'</script>");
         } else {
             response.getWriter().print("<script>alert('删除失败');window.location='userList'</script>");
@@ -189,7 +178,7 @@ public class UserController {
         }
     }
     @RequestMapping("/userChangeRank")
-    public String userChangeRank(HttpServletRequest request,String uid){
+    public String userChangeRank(HttpServletRequest request, String uid){
         HttpSession session=request.getSession();
         ms.setSql("select uid,name,`rank` from user where uid=?").set(Integer.parseInt(uid));
         session.setAttribute("list",ms.runList());
@@ -198,7 +187,7 @@ public class UserController {
         return "userChangeRank";
     }
     @RequestMapping("/UserChangeRank")
-    public void UserChangeRank(HttpServletRequest request, HttpServletResponse response,String rank) throws IOException {
+    public void UserChangeRank(HttpServletRequest request, HttpServletResponse response, String rank) throws IOException {
         //用户管理员无法赋予超级管理员权限.
         HttpSession session=request.getSession();
         if(Integer.parseInt(rank)==1 &&Integer.parseInt(((LinkedHashMap<String, Object>) session.getAttribute("user")).get("rank").toString())==6){

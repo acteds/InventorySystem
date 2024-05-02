@@ -3,6 +3,7 @@ package com.controller;
 import com.aotmd.Tools;
 import com.dao.MySql;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.servlet.ServletContext;
@@ -20,7 +21,7 @@ import java.util.*;
  */
 @Controller
 public class ParametersController {
-    private MySql ms;
+    private final MySql ms;
 
     /**
      * 初始化参数字典
@@ -29,24 +30,7 @@ public class ParametersController {
     public ParametersController(MySql ms) {
         this.ms = ms;
     }
-    public static LinkedHashMap<String, LinkedHashMap<String, String>> initializationParameters(MySql mySql){
-        List<LinkedHashMap<String, Object>> result = mySql.setSql("select pmid from parameters_main").runList();
-        int []pmid= new int[result.size()];
-        for (int i=0;i<result.size();i++){
-            pmid[i]= (int) result.get(i).get("pmid");
-        }
-        LinkedHashMap<String, LinkedHashMap<String, String>> parametersList = new LinkedHashMap<>();
-        for (int i = 0; i < pmid.length; i++) {
-            mySql.setSql("select name,value from parameters_sub where pmid=?").set(pmid[i]);
-            List<LinkedHashMap<String, Object>> list = mySql.runList();
-            LinkedHashMap<String, String> map = new LinkedHashMap<>();
-            for (LinkedHashMap<String, Object> temp : list) {
-                map.put(temp.get("value").toString(), temp.get("name").toString());
-            }
-            parametersList.put(String.valueOf(pmid[i]), map);
-        }
-        return parametersList;
-    }
+
     @RequestMapping("/parametersMainList")
     public String parametersMainList(HttpServletRequest request) {
         //----------------------------------------判断传值并写入session------------------------------------------------
@@ -69,7 +53,7 @@ public class ParametersController {
     public void ParametersMainInsert(HttpServletRequest request, HttpServletResponse response,String name) throws IOException {
         String []top= (String[]) request.getSession().getAttribute("top");
         ms.setSql("select * from parameters_main where name=?").set(name);
-        if(ms.runList().size()>0) {
+        if(!ms.runList().isEmpty()) {
             response.getWriter().print("<script>alert('添加参数名称失败,名称重复');window.location='parametersMainList'</script>");
             return;
         }
@@ -143,7 +127,7 @@ public class ParametersController {
         }
     }
     @RequestMapping("/parametersSubList")
-    public String parametersSubList(HttpServletRequest request, HttpServletResponse response,String pmid,String name) {
+    public String parametersSubList(HttpServletRequest request, String pmid, String name) {
         HttpSession session = request.getSession();
         //----------------------------------------判断传值并写入session------------------------------------------------
         if (pmid!=null&&name!=null){
@@ -171,13 +155,14 @@ public class ParametersController {
         request.getSession().setAttribute("top",top);
         return "parametersSubInsert";
     }
+    @Transactional
     @RequestMapping("/ParametersSubInsert")
     public void ParametersSubInsert(HttpServletRequest request, HttpServletResponse response,String name,String value) throws IOException {
         int pmid= Integer.parseInt((String) request.getSession().getAttribute("parametersMainID"));
         // ---------------------------------------查重-----------------------------
         String []top= (String[]) request.getSession().getAttribute("top");
         ms.setSql("SELECT * FROM parameters_sub where pmid=? and( name=? or value=?)").set(pmid).set(name).set(value);
-        if(ms.runList().size()>0) {
+        if(!ms.runList().isEmpty()) {
             response.getWriter().print("<script>alert('添加键值失败,名称或值重复，请重新输入');window.history.go(-1);</script>");
             return;
         }
@@ -190,7 +175,7 @@ public class ParametersController {
         if(ms.run()>0) {
             /*更新图*/
             ServletContext application= request.getSession().getServletContext();
-            application.setAttribute("parameters",ParametersController.initializationParameters(ms));
+            application.setAttribute("parameters", InitController.initializationParameters(ms));
             response.setHeader("refresh", "0;URL=parametersSubList");
         } else {
             response.getWriter().print("<script>alert('添加参数失败');window.location='parametersSubList'</script>");
@@ -204,6 +189,7 @@ public class ParametersController {
         request.getSession().setAttribute("list",list);
         return "parametersSubChange";
     }
+    @Transactional
     @RequestMapping("/ParametersSubChange")
     public void ParametersSubChange(HttpServletRequest request, HttpServletResponse response,String name,String value) throws IOException {
         HttpSession session=request.getSession();
@@ -231,12 +217,13 @@ public class ParametersController {
         if(ms.run()>0) {
             /*更新图*/
             ServletContext application= request.getSession().getServletContext();
-            application.setAttribute("parameters",ParametersController.initializationParameters(ms));
+            application.setAttribute("parameters", InitController.initializationParameters(ms));
             response.setHeader("refresh", "0;URL=parametersSubList");
         } else {
             response.getWriter().print("<script>alert('修改键值失败');window.history.go(-1);</script>");
         }
     }
+    @Transactional
     @RequestMapping("/ParametersSubDel")
     public void ParametersSubDel(HttpServletRequest request, HttpServletResponse response,String psid) throws IOException {
         //-----------------------------------判断是否有传值-----------------------------------------------------------------
@@ -249,7 +236,7 @@ public class ParametersController {
         if (ms.run() > 0) {
             /*更新图*/
             ServletContext application= request.getSession().getServletContext();
-            application.setAttribute("parameters",ParametersController.initializationParameters(ms));
+            application.setAttribute("parameters", InitController.initializationParameters(ms));
             response.setHeader("refresh", "0;URL=parametersSubList");
         } else {
             response.getWriter().print("<script>alert('删除失败');window.location='parametersSubList'</script>");

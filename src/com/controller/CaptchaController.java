@@ -54,7 +54,7 @@ public class CaptchaController {
  */
 class VerifyCode {
     public static String drawRandomText(int width, int height, BufferedImage verifyImg) {
-        String randomText = "";
+        StringBuilder randomText = new StringBuilder();
         Graphics2D graphics = (Graphics2D) verifyImg.getGraphics();
         /*设置画笔颜色-验证码背景色*/
         /*graphics.setColor(Color.WHITE);*/
@@ -75,7 +75,7 @@ class VerifyCode {
             int degree = random.nextInt() % 30;
             int dot = random.nextInt(baseNumLetter.length());
             ch = baseNumLetter.charAt(dot) + "";
-            randomText += ch;
+            randomText.append(ch);
             graphics.rotate(degree * Math.PI / 180, x, height * 0.65);
             /*反向旋转*/
             graphics.drawString(ch, x, (int) (height * 0.65));
@@ -96,7 +96,7 @@ class VerifyCode {
             graphics.setColor(getRandomColor());
             graphics.fillRect(x1, y1, 2, 2);
         }
-        return randomText;
+        return randomText.toString();
     }
 
     /**
