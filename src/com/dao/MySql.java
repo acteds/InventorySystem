@@ -1,10 +1,16 @@
 package com.dao;
 
-import org.apache.ibatis.annotations.*;
+import org.apache.ibatis.annotations.DeleteProvider;
+import org.apache.ibatis.annotations.InsertProvider;
+import org.apache.ibatis.annotations.SelectProvider;
+import org.apache.ibatis.annotations.UpdateProvider;
 import org.springframework.stereotype.Repository;
+
 import javax.servlet.http.HttpServletRequest;
 import java.sql.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
 
 interface MySqlDao{
 	@SelectProvider(type = UserMapper.class, method = "returnSql")
@@ -27,39 +33,54 @@ interface MySqlDao{
  */
 @Repository
 public class MySql {
+	static ThreadLocal<ThreadCache> TL = new ThreadLocal<ThreadCache>(){
+		@Override
+		protected ThreadCache initialValue() {
+			return new ThreadCache();
+		}
+	};
+
+	public static class ThreadCache {
+		public String sql = "";
+		public PreparedStatement ps = null;
+		/**
+		 * 总条目数
+		 */
+		public int sum = 0;
+		/**
+		 * 索引
+		 */
+		public int index = 0;
+		/**
+		 * 数据库表字段(Map键值)
+		 */
+		public String[] top = null;
+
+		public ThreadCache() {
+		}
+	}
 	MySqlDao mySqlDao;
-	private String sql = "";
-	private PreparedStatement ps = null;
 	private Connection conn = null;
-	 /**总条目数*/
-	private int sum = 0;
-	/** 索引*/
-	private int index=0;
-	/**数据库表字段(Map键值)*/
-	private String[] top = null;
 
 	public MySql(MySqlDao mySqlDao) {
 		this.mySqlDao = mySqlDao;
 		connectToTheDatabase();
 	}
-//	/**
-//	 * 默认构造方法
-//	 */
-//	public MySql() {login();}
+
 	/**
 	 * 	反复使用时的更新Sql语句方法
 	 * @param sql mysql语句
 	 * @return this
 	 */
 	public MySql setSql(String sql) {
-		sum = 0;
-		index=1;
+		TL.get().sum = 0;
+		TL.get().index = 1;
 		try {
 		    //检查连接存活状态
             if (conn.isClosed()){
                 connectToTheDatabase();
             }
-			ps = conn.prepareStatement(sql);
+			TL.get().ps = conn.prepareStatement(sql);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -70,7 +91,7 @@ public class MySql {
 	 * @return 返回sql语句
 	 */
 	public String getSql() {
-		return sql;
+		return TL.get().sql;
 	}
 	/**
 	 *	 连接数据库
@@ -93,7 +114,7 @@ public class MySql {
 	 */
 	public MySql set(Object object) {
 		try {
-			ps.setObject(index++,object);
+			TL.get().ps.setObject(TL.get().index++,object);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -107,19 +128,20 @@ public class MySql {
 	public int run() {
 		int i = 0;
 		try {
-			String temp = ps.toString();
-			ps.close();
-        	sql=temp.substring(temp.indexOf(": ")+2);
-        	if (sql.contains("?")){
+			String temp = TL.get().ps.toString();
+			TL.get().ps.close();
+			String sql1 = temp.substring(temp.indexOf(": ") + 2);
+			TL.get().sql = sql1;//记录用
+        	if (sql1.contains("?")){
 				System.out.println("sql语句错误!有多余的?号");
             }
-			String type=sql.trim().split("\\s+")[0];
+			String type=sql1.trim().split("\\s+")[0];
         	if (type.equalsIgnoreCase("update")){
-        		i=mySqlDao.update(sql);
+        		i=mySqlDao.update(sql1);
 			}else if (type.equalsIgnoreCase("insert")){
-				i=mySqlDao.insert(sql);
+				i=mySqlDao.insert(sql1);
 			}else if (type.equalsIgnoreCase("delete")){
-				i=mySqlDao.delete(sql);
+				i=mySqlDao.delete(sql1);
 			}else {
 				System.out.println("不是增删改的数据库语句");
             }
@@ -148,42 +170,44 @@ public class MySql {
 		// 声明返回的对象
 		List<LinkedHashMap<String, Object>> list = new ArrayList<>();
 		try {
-			String temp = ps.toString();
-			sql=temp.substring(temp.indexOf(": ")+2);
-			if (sql.contains("?")){
+			String temp = TL.get().ps.toString();
+			String sql1;
+			sql1 =temp.substring(temp.indexOf(": ")+2);
+			TL.get().sql = sql1;//记录用
+			if (sql1.contains("?")){
 				System.out.println("sql语句错误!有多余的?号");
-				System.out.println(sql);
-				ps.close();
+				System.out.println(sql1);
+				TL.get().ps.close();
 				return list;
 			}
-			String type=sql.trim().split("\\s+")[0];
+			String type= sql1.trim().split("\\s+")[0];
 			if (type.equalsIgnoreCase("select")){
-				list=mySqlDao.select(sql);
+				list=mySqlDao.select(sql1);
 			}else {
 				System.out.println("不是查询的数据库语句");
-				System.out.println(sql);
-				ps.close();
+				System.out.println(sql1);
+				TL.get().ps.close();
 				return list;
 			}
-			sum=list.size();
+			TL.get().sum = list.size();
 			//当MyBatis取得到值时获取数据库列字段,取不到时使用JDBC取数据库列字段
 			if (!list.isEmpty()){
-				top=list.get(0).keySet().toArray(new String[0]);
+				TL.get().top = list.get(0).keySet().toArray(new String[0]);
 			} else {
 				System.out.println("调用JDBC获取字段");
-				ResultSet resu = ps.executeQuery();
+				ResultSet resu = TL.get().ps.executeQuery();
 				// 分析结果集
 				ResultSetMetaData rsmd = resu.getMetaData();
 				// 获取列数
 				int cols = rsmd.getColumnCount();
 				// 初始化
-				top = new String[cols];
+				TL.get().top = new String[cols];
 				for (int i = 0; i < cols; i++) {
 					// 获取列名存入String[]
-					top[i] = rsmd.getColumnName(i + 1);
+					TL.get().top[i] = rsmd.getColumnName(i + 1);
 				}
 			}
-			ps.close();
+			TL.get().ps.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
@@ -206,7 +230,7 @@ public class MySql {
 		List<LinkedHashMap<String, Object>> list = this.set((currentPage - 1) * pageMax).set(pageMax).runList();
 		request.getSession().setAttribute("list", list);
 		//重新查询未分页时的记录数(更新sum值)
-		this.setSql(sql.substring(0,sql.indexOf("order")-1)).runList();
+		this.setSql(TL.get().sql.substring(0, TL.get().sql.indexOf("order")-1)).runList();
 		// 总页数
 		int pages;
 		if (this.getSum() % pageMax == 0) {
@@ -236,7 +260,7 @@ public class MySql {
 	 * @return 返回String[](Map键值)
 	 */
 	public String[] getTop() {
-		return top;
+		return TL.get().top;
 	}
 
 	/**
@@ -245,10 +269,10 @@ public class MySql {
 	 * @return 返回executeQuery()获得记录的行数
 	 */
 	public int getSum() {
-		return sum;
+		return TL.get().sum;
 	}
 
-//	public static void main(String[] args) {
+	//	public static void main(String[] args) {
 	/*	MySql ms = new MySql("select * from linkman where uid=?");
 		List<Map<String, Object>> list = ms.set(1).runlist();
 		//-------------------------获取表头(Map的Key)----------------------------
